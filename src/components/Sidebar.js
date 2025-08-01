@@ -3,10 +3,10 @@ import React from 'react'
 const Sidebar = ({ isOpen, onClose, userData, tenantData, onNavigate, currentView }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/dashboard' },
-    { id: 'org-settings', label: 'Organizational Settings', icon: '⚙️', path: '/org-settings' },
     { id: 'account-billing', label: 'Account / Billing', icon: '💳', path: '/account-billing' },
     { id: 'employees', label: 'Employees', icon: '👨‍💼', path: '/employees' },
     { id: 'roles-locations', label: 'Roles & Locations', icon: '👥', path: '/roles-locations' },
+    { id: 'org-settings', label: 'Organizational Settings', icon: '⚙️', path: '/org-settings' },
     { id: 'shifts', label: 'Shifts', icon: '📅', path: '/shifts' },
     { id: 'analytics', label: 'Analytics', icon: '📈', path: '/analytics' },
     { id: 'help', label: 'Help', icon: '❓', path: '/help' },

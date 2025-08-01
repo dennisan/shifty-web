@@ -75,6 +75,34 @@ const Layout = ({ children, onNavigate, currentView }) => {
           marginTop: 'auto'
         }}
       >
+        <div style={{ marginBottom: '10px' }}>
+          <a 
+            href="/terms.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ 
+              color: '#fff', 
+              textDecoration: 'none', 
+              margin: '0 15px',
+              fontSize: '14px'
+            }}
+          >
+            Terms of Service
+          </a>
+          <a 
+            href="/privacy.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ 
+              color: '#fff', 
+              textDecoration: 'none', 
+              margin: '0 15px',
+              fontSize: '14px'
+            }}
+          >
+            Privacy Policy
+          </a>
+        </div>
         <p style={{ margin: 0 }}>
           © 2025 Signal Peak Software. All rights reserved.
         </p>

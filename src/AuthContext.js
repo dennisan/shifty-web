@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    // Get initial session only
+    // Get initial session
     const getSession = async () => {
       console.log('Getting initial session...')
       const { data: { session } } = await supabase.auth.getSession()
@@ -49,6 +49,23 @@ export const AuthProvider = ({ children }) => {
     }
 
     getSession()
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id)
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          await fetchUserData(session.user.id)
+        } else {
+          setUserData(null)
+          setTenantData(null)
+        }
+      }
+    )
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const signUp = async (email, password) => {
@@ -77,6 +94,7 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
     if (!error) {
+      setUser(null)
       setUserData(null)
       setTenantData(null)
     }

@@ -213,29 +213,29 @@ const AccountBilling = ({ onNavigateToUserView }) => {
         <div style={{ 
           marginBottom: '32px',
           padding: '32px',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          border: '3px solid #667eea',
           borderRadius: '16px',
-          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+          backgroundColor: 'white',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           position: 'relative',
-          overflow: 'hidden',
-          color: 'white'
+          overflow: 'hidden'
         }}>
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <h3 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: 'bold' }}>Current Subscription</h3>
+            <h3 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: 'bold', color: '#2d3748' }}>Current Subscription</h3>
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
             gap: '15px' 
           }}>
             <div>
-              <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginBottom: '5px' }}>Plan</div>
-              <div style={{ fontSize: '16px', fontWeight: 'bold', color: 'white' }}>
+              <div style={{ fontSize: '14px', color: '#718096', marginBottom: '5px' }}>Plan</div>
+              <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#2d3748' }}>
                 {currentSubscription.stripe_products?.name || 'N/A'}
               </div>
             </div>
             
             <div>
-              <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginBottom: '5px' }}>Status</div>
+              <div style={{ fontSize: '14px', color: '#718096', marginBottom: '5px' }}>Status</div>
               <div style={{ 
                 fontSize: '14px', 
                 fontWeight: 'bold',
@@ -246,26 +246,26 @@ const AccountBilling = ({ onNavigateToUserView }) => {
             </div>
             
             <div>
-              <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginBottom: '5px' }}>Billing Cycle</div>
-              <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'white' }}>
+              <div style={{ fontSize: '14px', color: '#718096', marginBottom: '5px' }}>Billing Cycle</div>
+              <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#2d3748' }}>
                 {currentSubscription.billing_interval === 'month' ? 'Monthly' : 'Yearly'}
               </div>
             </div>
             
             <div>
-              <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginBottom: '5px' }}>Current Period</div>
-              <div style={{ fontSize: '14px', color: 'white' }}>
+              <div style={{ fontSize: '14px', color: '#718096', marginBottom: '5px' }}>Current Period</div>
+              <div style={{ fontSize: '14px', color: '#2d3748' }}>
                 {formatDate(currentSubscription.current_period_start)} - {formatDate(currentSubscription.current_period_end)}
               </div>
             </div>
             
             {userLimitInfo && (
               <div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginBottom: '5px' }}>Plan Limit</div>
+                <div style={{ fontSize: '14px', color: '#718096', marginBottom: '5px' }}>Plan Limit</div>
                 <div style={{ 
                   fontSize: '16px', 
                   fontWeight: 'bold',
-                  color: '#ffd700'
+                  color: '#667eea'
                 }}>
                   {userLimitInfo.plan_limit} users
                 </div>
@@ -274,11 +274,11 @@ const AccountBilling = ({ onNavigateToUserView }) => {
             
             {userLimitInfo && (
               <div>
-                <div style={{ fontSize: '14px', color: 'rgba(255,255,255,0.8)', marginBottom: '5px' }}>Active Users</div>
+                <div style={{ fontSize: '14px', color: '#718096', marginBottom: '5px' }}>Active Users</div>
                 <div style={{ 
                   fontSize: '16px', 
                   fontWeight: 'bold',
-                  color: userLimitInfo.is_within_limit ? '#90EE90' : '#FFB6C1'
+                  color: userLimitInfo.is_within_limit ? '#28a745' : '#dc3545'
                 }}>
                   {userLimitInfo.active_count}
                 </div>
@@ -291,10 +291,10 @@ const AccountBilling = ({ onNavigateToUserView }) => {
               <div style={{ 
                 gridColumn: '1 / -1',
                 padding: '10px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                border: '1px solid rgba(255,255,255,0.3)',
+                backgroundColor: '#fff3cd',
+                border: '1px solid #ffeaa7',
                 borderRadius: '5px',
-                color: 'white'
+                color: '#856404'
               }}>
                 ⚠️ This subscription will be canceled at the end of the current billing period.
               </div>

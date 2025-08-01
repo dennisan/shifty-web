@@ -41,8 +41,8 @@ const Auth = () => {
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
+    <div className="auth-container" style={{ maxWidth: '400px', width: '100%', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '20px' }}>
+      <div className="auth-card" style={{ width: '100%', maxWidth: '400px' }}>
         <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
         
         <form onSubmit={handleSubmit}>

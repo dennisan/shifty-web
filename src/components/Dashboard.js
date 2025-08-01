@@ -215,28 +215,28 @@ const Dashboard = ({ onNavigate }) => {
           gap: '20px'
         }}>
           <QuickAction
-            title="Create Shift"
-            description="Schedule a new shift for your team"
-            icon="📅"
-            onClick={() => onNavigate('shifts')}
-          />
-          <QuickAction
-            title="Invite Employees"
-            description="Send invitations to new team members"
+            title="Manage Employees"
+            description="View and manage your team members"
             icon="👤"
             onClick={() => onNavigate('employees')}
-          />
-          <QuickAction
-            title="View Schedule"
-            description="See this week's shift schedule"
-            icon="📋"
-            onClick={() => onNavigate('shifts')}
           />
           <QuickAction
             title="Manage Roles & Locations"
             description="Configure user roles and work locations"
             icon="👥"
             onClick={() => onNavigate('roles-locations')}
+          />
+          <QuickAction
+            title="Create Shift"
+            description="Schedule a new shift for your team"
+            icon="📅"
+            onClick={() => onNavigate('shifts')}
+          />
+          <QuickAction
+            title="Get Help"
+            description="Access QwikShift support and documentation"
+            icon="❓"
+            onClick={() => onNavigate('help')}
           />
         </div>
       </div>

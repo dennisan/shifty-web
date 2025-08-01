@@ -36,8 +36,14 @@ body {
 
 /* Auth styles */
 .auth-container {
-  width: 100%;
-  max-width: 400px;
+  width: 100% !important;
+  max-width: 400px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+  padding: 20px !important;
 }
 
 .auth-card {
@@ -45,6 +51,8 @@ body {
   border-radius: 12px;
   padding: 40px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 100% !important;
+  max-width: 400px !important;
 }
 
 .auth-card h2 {
