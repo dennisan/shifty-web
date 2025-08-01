@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../AuthContext'
+import { supabase } from '../supabaseClient'
 
 const Dashboard = ({ onNavigate }) => {
   const { userData, tenantData } = useAuth()
@@ -11,19 +12,105 @@ const Dashboard = ({ onNavigate }) => {
     upcomingShifts: 0,
     completedShifts: 0
   })
+  const [loading, setLoading] = useState(true)
+  const hasFetched = useRef(false)
+  
+  // Global flag to prevent duplicate calls across component instances
+  if (!window.dashboardFetching) {
+    window.dashboardFetching = new Set()
+  }
 
-  // Mock data for now - in real app this would come from API
+  const fetchDashboardStats = useCallback(async () => {
+    if (!tenantData?.id) {
+      setLoading(false)
+      return
+    }
+
+    console.log('Dashboard: Fetching real stats from database')
+    setLoading(true)
+
+    try {
+      // Get current date for calculations
+      const now = new Date()
+      const today = now.toISOString().split('T')[0]
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+      // Fetch posts and users data in parallel
+      const [postsResult, usersResult] = await Promise.all([
+        supabase
+          .from('posts')
+          .select('*')
+          .eq('tid', tenantData.id)
+          .gte('start_date', thirtyDaysAgo)
+          .order('start_date', { ascending: false }),
+        supabase
+          .from('users')
+          .select('*')
+          .eq('tid', tenantData.id)
+      ])
+
+      if (postsResult.error) {
+        console.error('Error fetching posts:', postsResult.error)
+        return
+      }
+
+      if (usersResult.error) {
+        console.error('Error fetching users:', usersResult.error)
+        return
+      }
+
+      const posts = postsResult.data || []
+      const users = usersResult.data || []
+
+      // Calculate stats from the data
+      const totalShifts = posts.length
+      const totalEmployees = users.length
+      const activeEmployees = users.filter(user => user.is_active).length
+
+      // Calculate shift statuses
+      const nowTime = now.getTime()
+      const activeShifts = posts.filter(post => {
+        const startTime = new Date(post.start_date + 'T' + post.start_time).getTime()
+        const endTime = new Date(post.end_date + 'T' + post.end_time).getTime()
+        return startTime <= nowTime && nowTime <= endTime
+      }).length
+
+      const upcomingShifts = posts.filter(post => {
+        const startTime = new Date(post.start_date + 'T' + post.start_time).getTime()
+        return startTime > nowTime
+      }).length
+
+      const completedShifts = posts.filter(post => {
+        const endTime = new Date(post.end_date + 'T' + post.end_time).getTime()
+        return endTime < nowTime
+      }).length
+
+      setStats({
+        totalShifts,
+        activeShifts,
+        totalEmployees,
+        activeEmployees,
+        upcomingShifts,
+        completedShifts
+      })
+
+      console.log('Dashboard: Stats calculated successfully')
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [tenantData?.id])
+
   useEffect(() => {
-    // Simulate loading dashboard data
-    setStats({
-      totalShifts: 156,
-      activeShifts: 23,
-      totalEmployees: 45,
-      activeEmployees: 38,
-      upcomingShifts: 12,
-      completedShifts: 121
-    })
-  }, [])
+    // Reset fetch flag when tenant changes
+    hasFetched.current = false
+    // Clean up any existing global flags
+    if (tenantData?.id) {
+      window.dashboardFetching.delete(tenantData.id)
+    }
+    fetchDashboardStats()
+  }, [fetchDashboardStats])
 
   const StatCard = ({ title, value, subtitle, color = '#667eea' }) => (
     <div style={{
@@ -39,7 +126,7 @@ const Dashboard = ({ onNavigate }) => {
         {title}
       </h3>
       <div style={{ fontSize: '32px', fontWeight: 'bold', color: color, marginBottom: '4px' }}>
-        {value}
+        {loading ? '...' : value}
       </div>
       <div style={{ fontSize: '14px', color: '#718096' }}>
         {subtitle}
@@ -181,14 +268,20 @@ const Dashboard = ({ onNavigate }) => {
         <StatCard 
           title="Total Shifts"
           value={stats.totalShifts}
-          subtitle="This month"
+          subtitle="All time"
           color="#667eea"
         />
         <StatCard 
-          title="Active Shifts"
-          value={stats.activeShifts}
-          subtitle="Currently running"
-          color="#38a169"
+          title="Upcoming Shifts"
+          value={stats.upcomingShifts}
+          subtitle="Scheduled ahead"
+          color="#3182ce"
+        />
+        <StatCard 
+          title="Completed Shifts"
+          value={stats.completedShifts}
+          subtitle="Finished shifts"
+          color="#805ad5"
         />
         <StatCard 
           title="Total Employees"
@@ -254,30 +347,19 @@ const Dashboard = ({ onNavigate }) => {
           padding: '24px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-            <span style={{ fontSize: '20px', marginRight: '12px' }}>🌅</span>
-            <div>
-              <div style={{ fontWeight: '600', color: '#2d3748' }}>Morning Shift</div>
-              <div style={{ fontSize: '14px', color: '#718096' }}>Tomorrow, 6:00 AM - 2:00 PM • 4 employees</div>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#718096' }}>
+              Loading upcoming shifts...
             </div>
-            <div style={{ marginLeft: 'auto', fontSize: '12px', color: '#718096' }}>Tomorrow</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
-            <span style={{ fontSize: '20px', marginRight: '12px' }}>🌆</span>
-            <div>
-              <div style={{ fontWeight: '600', color: '#2d3748' }}>Evening Shift</div>
-              <div style={{ fontSize: '14px', color: '#718096' }}>Tomorrow, 2:00 PM - 10:00 PM • 3 employees</div>
+          ) : stats.upcomingShifts === 0 ? (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#718096' }}>
+              No upcoming shifts scheduled
             </div>
-            <div style={{ marginLeft: 'auto', fontSize: '12px', color: '#718096' }}>Tomorrow</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontSize: '20px', marginRight: '12px' }}>🌙</span>
-            <div>
-              <div style={{ fontWeight: '600', color: '#2d3748' }}>Night Shift</div>
-              <div style={{ fontSize: '14px', color: '#718096' }}>Wednesday, 10:00 PM - 6:00 AM • 2 employees</div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#718096' }}>
+              {stats.upcomingShifts} upcoming shifts scheduled
             </div>
-            <div style={{ marginLeft: 'auto', fontSize: '12px', color: '#718096' }}>Wednesday</div>
-          </div>
+          )}
         </div>
       </div>
     </div>

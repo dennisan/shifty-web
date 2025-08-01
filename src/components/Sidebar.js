@@ -3,11 +3,11 @@ import React from 'react'
 const Sidebar = ({ isOpen, onClose, userData, tenantData, onNavigate, currentView }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/dashboard' },
-    { id: 'account-billing', label: 'Account / Billing', icon: '💳', path: '/account-billing' },
+    { id: 'account-billing', label: 'Subscription', icon: '💳', path: '/account-billing' },
     { id: 'employees', label: 'Employees', icon: '👨‍💼', path: '/employees' },
     { id: 'roles-locations', label: 'Roles & Locations', icon: '👥', path: '/roles-locations' },
-    { id: 'org-settings', label: 'Organizational Settings', icon: '⚙️', path: '/org-settings' },
     { id: 'shifts', label: 'Shifts', icon: '📅', path: '/shifts' },
+    { id: 'org-settings', label: 'Settings', icon: '⚙️', path: '/org-settings' },
     { id: 'analytics', label: 'Analytics', icon: '📈', path: '/analytics' },
     { id: 'help', label: 'Help', icon: '❓', path: '/help' },
   ]
@@ -28,7 +28,7 @@ const Sidebar = ({ isOpen, onClose, userData, tenantData, onNavigate, currentVie
           left: 0,
           top: 64, // Below header
           bottom: 0,
-          width: '250px',
+          width: '200px',
           backgroundColor: '#2c3e50',
           color: 'white',
           overflowY: 'auto',

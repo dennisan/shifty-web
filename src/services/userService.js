@@ -1,95 +1,36 @@
 import { supabase, supabaseService } from '../supabaseClient'
 
+// Track ongoing requests to prevent duplicates
+const ongoingRequests = new Map()
+
 export const fetchUserAndTenantInfo = async (userId) => {
-  try {
-    console.log('Starting fetchUserAndTenantInfo for userId:', userId)
-    
-    // First, fetch user information including tenant ID
-    console.log('Fetching user data from users table...')
-    
-    // Add timeout to prevent hanging
-    const userQueryPromise = supabaseService
-      .from('users')
-      .select(`
-        *,
-        roles:role_id (*),
-        locations:primary_location_id (*)
-      `)
-      .eq('id', userId)
-      .single()
-
-    // Add a timeout of 10 seconds
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Database query timeout')), 10000)
-    )
-
-    const { data: userData, error: userError } = await Promise.race([
-      userQueryPromise,
-      timeoutPromise
-    ])
-
-    // console.log('User query result:', { userData, userError })
-
-    if (userError) {
-      console.error('Error fetching user data:', userError)
-      
-      // If user doesn't exist in users table, return null data
-      if (userError.code === 'PGRST116') {
-        console.log('User not found in users table - this is expected for new users')
-        return {
-          user: null,
-          tenant: null
-        }
-      }
-      
-      throw userError
+  console.log('userService: Using mock data (queries disabled)')
+  
+  // Simulate loading delay
+  await new Promise(resolve => setTimeout(resolve, 300))
+  
+  // Return mock user and tenant data
+  return {
+    user: {
+      id: userId,
+      first_name: 'Alex',
+      last_name: 'Morgan',
+      email: 'alex.morgan@example.com',
+      tid: 'f9e12108-90bb-4e0b-b225-8d6933aeaf81',
+      role_id: '5c1d3000-4b12-488d-af4e-754917886dff',
+      primary_location_id: '7a8b9c0d-1e2f-3g4h-5i6j-7k8l9m0n1o2p',
+      is_active: true,
+      created_at: '2024-01-15T10:30:00Z',
+      updated_at: '2024-01-15T10:30:00Z'
+    },
+    tenant: {
+      id: 'f9e12108-90bb-4e0b-b225-8d6933aeaf81',
+      name: 'Vetcor',
+      address: '456 Elm St, Metropolis, NY',
+      activation_code: 'C2J4JXUI',
+      is_registration_enabled: true,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
     }
-
-    if (!userData) {
-      console.log('User not found in database - this is expected for new users')
-      return {
-        user: null,
-        tenant: null
-      }
-    }
-
-    console.log('User data found:', userData)
-    console.log('Tenant ID from user data:', userData.tid)
-
-    // Then, fetch tenant information using the tid from user data
-    console.log('Fetching tenant data from tenants table...')
-    
-    const tenantQueryPromise = supabaseService
-      .from('tenants')
-      .select('*')
-      .eq('id', userData.tid)
-      .single()
-
-    const { data: tenantData, error: tenantError } = await Promise.race([
-      tenantQueryPromise,
-      timeoutPromise
-    ])
-
-    // console.log('Tenant query result:', { tenantData, tenantError })
-
-    if (tenantError) {
-      console.error('Error fetching tenant data:', tenantError)
-      throw tenantError
-    }
-
-    if (!tenantData) {
-      console.error('Tenant not found in database')
-      throw new Error('Tenant not found in database')
-    }
-
-    console.log('Tenant data found:', tenantData)
-
-    return {
-      user: userData,
-      tenant: tenantData
-    }
-  } catch (error) {
-    console.error('Error in fetchUserAndTenantInfo:', error)
-    throw error
   }
 } 

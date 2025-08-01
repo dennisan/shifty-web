@@ -637,7 +637,7 @@ body {
 /* Desktop sidebar */
 @media (min-width: 1200px) {
   .main-content {
-    margin-left: 250px !important;
+    margin-left: 200px !important;
   }
   
   .sidebar-desktop {
