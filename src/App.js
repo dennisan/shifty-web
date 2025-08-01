@@ -5,6 +5,13 @@ import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
 import UserView from './components/UserView'
 import Layout from './components/Layout'
+import OrganizationalSettings from './components/OrganizationalSettings'
+import RolesLocations from './components/RolesLocations'
+import Shifts from './components/Shifts'
+import Analytics from './components/Analytics'
+import Help from './components/Help'
+import AccountBilling from './components/AccountBilling'
+import Employees from './components/Employees'
 
 const AppContent = () => {
   const { user, userData, tenantData, loading } = useAuth()
@@ -31,20 +38,38 @@ const AppContent = () => {
     setCurrentView('dashboard')
   }
 
+  const handleNavigation = (view) => {
+    setCurrentView(view)
+  }
+
   const renderAuthenticatedContent = () => {
     switch (currentView) {
       case 'userview':
         return <UserView onNavigateToDashboard={handleNavigateToDashboard} />
+      case 'org-settings':
+        return <OrganizationalSettings />
+      case 'employees':
+        return <Employees />
+      case 'roles-locations':
+        return <RolesLocations />
+      case 'shifts':
+        return <Shifts />
+      case 'analytics':
+        return <Analytics />
+      case 'help':
+        return <Help />
+      case 'account-billing':
+        return <AccountBilling />
       case 'dashboard':
       default:
-        return <Dashboard onNavigateToUserView={handleNavigateToUserView} />
+        return <Dashboard onNavigateToUserView={handleNavigateToUserView} onNavigate={handleNavigation} />
     }
   }
 
   return (
     <div className="App">
       {user ? (
-        <Layout>
+        <Layout onNavigate={handleNavigation} currentView={currentView}>
           {renderAuthenticatedContent()}
         </Layout>
       ) : (

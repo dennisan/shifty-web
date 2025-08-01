@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session only
     const getSession = async () => {
       console.log('Getting initial session...')
       const { data: { session } } = await supabase.auth.getSession()
@@ -49,28 +49,6 @@ export const AuthProvider = ({ children }) => {
     }
 
     getSession()
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change event:', event)
-        console.log('Session in auth state change:', session)
-        setUser(session?.user ?? null)
-        
-        if (session?.user) {
-          console.log('User found in auth state change, fetching user data...')
-          await fetchUserData(session.user.id)
-        } else {
-          console.log('No user in auth state change, clearing data')
-          setUserData(null)
-          setTenantData(null)
-        }
-        
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
   }, [])
 
   const signUp = async (email, password) => {
@@ -123,7 +101,8 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
   }
 
-  console.log('AuthContext state:', { user, userData, tenantData, loading })
+  // Only log when state actually changes (optional)
+  // console.log('AuthContext state:', { user, userData, tenantData, loading })
 
   return (
     <AuthContext.Provider value={value}>

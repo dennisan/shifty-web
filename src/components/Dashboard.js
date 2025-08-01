@@ -1,435 +1,285 @@
 import React, { useState, useEffect } from 'react'
-import { supabase, supabaseService } from '../supabaseClient'
+import { useAuth } from '../AuthContext'
 
-const Dashboard = ({ onNavigateToUserView }) => {
-  const [subscriptionPlans, setSubscriptionPlans] = useState([])
-  const [currentSubscription, setCurrentSubscription] = useState(null)
-  const [userLimitInfo, setUserLimitInfo] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [selectedPlan, setSelectedPlan] = useState(null)
+const Dashboard = ({ onNavigate }) => {
+  const { userData, tenantData } = useAuth()
+  const [stats, setStats] = useState({
+    totalShifts: 0,
+    activeShifts: 0,
+    totalEmployees: 0,
+    activeEmployees: 0,
+    upcomingShifts: 0,
+    completedShifts: 0
+  })
 
+  // Mock data for now - in real app this would come from API
   useEffect(() => {
-    fetchSubscriptionPlans()
-    fetchCurrentSubscription()
+    // Simulate loading dashboard data
+    setStats({
+      totalShifts: 156,
+      activeShifts: 23,
+      totalEmployees: 45,
+      activeEmployees: 38,
+      upcomingShifts: 12,
+      completedShifts: 121
+    })
   }, [])
 
-  const fetchSubscriptionPlans = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('stripe_products')
-        .select('*')
-        .eq('is_active', true)
-        .eq('is_trial', false)
-        .order('price_cents_monthly', { ascending: true })
-
-      if (error) {
-        console.error('Error fetching subscription plans:', error)
-      } else {
-        console.log('Subscription plans:', data)
-        setSubscriptionPlans(data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching subscription plans:', error)
-    }
-  }
-
-  const fetchCurrentSubscription = async () => {
-    try {
-      setLoading(true)
-      console.log('Fetching current subscription...')
-      
-      // Get the current user's tenant_id from userData
-      const { data: userData } = await supabase.auth.getUser()
-      console.log('User data:', userData)
-      
-      if (!userData?.user) {
-        console.log('No user data found')
-        setLoading(false)
-        return
-      }
-
-      // Get user's tenant information
-      const { data: userInfo, error: userError } = await supabase
-        .from('users')
-        .select('tid')
-        .eq('id', userData.user.id)
-        .single()
-
-      console.log('User info:', userInfo, 'User error:', userError)
-
-      if (userError || !userInfo?.tid) {
-        console.log('No tenant found for user')
-        setLoading(false)
-        return
-      }
-
-      console.log('Tenant ID:', userInfo.tid)
-
-      // Get current subscription for the tenant using service role
-      const { data: subscription, error: subscriptionError } = await supabaseService
-        .from('tenant_subscriptions')
-        .select(`
-          *,
-          stripe_products (
-            name,
-            description
-          )
-        `)
-        .eq('tenant_id', userInfo.tid)
-        .in('status', ['active', 'trialing', 'past_due'])
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-
-      console.log('Subscription query result:', { subscription, subscriptionError })
-
-      if (subscriptionError) {
-        console.log('No active subscription found:', subscriptionError.message)
-      } else {
-              console.log('Current subscription:', subscription)
-      setCurrentSubscription(subscription)
-      
-      // If we have a subscription, fetch user limit info
-      if (subscription) {
-        fetchUserLimitInfo(userInfo.tid)
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching current subscription:', error)
-  } finally {
-    setLoading(false)
-  }
-}
-
-const fetchUserLimitInfo = async (tenantId) => {
-  try {
-    console.log('Fetching user limit info for tenant:', tenantId)
-    
-    const { data, error } = await supabaseService
-      .rpc('check_tenant_user_limit', { tenant_uuid: tenantId })
-    
-    console.log('User limit info result:', { data, error })
-    
-    if (error) {
-      console.error('Error fetching user limit info:', error)
-    } else if (data && data.length > 0) {
-      const info = data[0]
-      console.log('User limit info:', info)
-      setUserLimitInfo({
-        active_count: info.active_user_count,
-        total_count: info.total_user_count,
-        plan_limit: info.plan_user_limit,
-        is_within_limit: info.is_within_limit
-      })
-    } else {
-      console.log('No user limit data returned')
-    }
-  } catch (error) {
-    console.error('Error fetching user limit info:', error)
-  }
-}
-
-  const formatPrice = (cents) => {
-    return `$${(cents / 100).toFixed(2)}`
-  }
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A'
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'active':
-        return '#28a745'
-      case 'trialing':
-        return '#17a2b8'
-      case 'past_due':
-        return '#ffc107'
-      case 'canceled':
-        return '#dc3545'
-      default:
-        return '#6c757d'
-    }
-  }
-
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case 'active':
-        return 'Active'
-      case 'trialing':
-        return 'Trial'
-      case 'past_due':
-        return 'Past Due'
-      case 'canceled':
-        return 'Canceled'
-      case 'incomplete':
-        return 'Incomplete'
-      default:
-        return status
-    }
-  }
-
-  const handlePlanSelect = (plan) => {
-    setSelectedPlan(plan)
-  }
-
-  const handleSubscribe = async (plan) => {
-    // TODO: Implement subscription logic
-    console.log('Subscribing to plan:', plan)
-    alert(`Subscribing to ${plan.name}`)
-  }
-
-  if (loading) {
-    return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <div>Loading subscription plans...</div>
+  const StatCard = ({ title, value, subtitle, color = '#667eea' }) => (
+    <div style={{
+      background: 'white',
+      borderRadius: '12px',
+      padding: '24px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      border: `3px solid ${color}`,
+      flex: 1,
+      minWidth: '180px'
+    }}>
+      <h3 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '16px', fontWeight: '600' }}>
+        {title}
+      </h3>
+      <div style={{ fontSize: '32px', fontWeight: 'bold', color: color, marginBottom: '4px' }}>
+        {value}
       </div>
-    )
-  }
+      <div style={{ fontSize: '14px', color: '#718096' }}>
+        {subtitle}
+      </div>
+    </div>
+  )
+
+  const QuickAction = ({ title, description, icon, onClick }) => (
+    <div 
+      onClick={onClick}
+      style={{
+        background: 'white',
+        borderRadius: '12px',
+        padding: '20px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        cursor: 'pointer',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        border: '1px solid #e2e8f0'
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.transform = 'translateY(-2px)'
+        e.target.style.boxShadow = '0 6px 12px rgba(0, 0, 0, 0.15)'
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.transform = 'translateY(0)'
+        e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
+      }}
+    >
+      <div style={{ fontSize: '24px', marginBottom: '12px', pointerEvents: 'none' }}>{icon}</div>
+      <h4 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '16px', pointerEvents: 'none' }}>
+        {title}
+      </h4>
+      <p style={{ margin: 0, color: '#718096', fontSize: '14px', pointerEvents: 'none' }}>
+        {description}
+      </p>
+    </div>
+  )
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '30px' }}>
-        <h1>Choose Your Subscription Plan</h1>
-        <p>Select the plan that best fits your needs</p>
+    <div style={{ padding: '20px' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '32px', fontWeight: 'bold' }}>
+          Welcome back, {userData?.first_name || 'User'}!
+        </h1>
+        <p style={{ margin: 0, color: '#718096', fontSize: '16px' }}>
+          Here's what's happening at {tenantData?.name || 'your organization'} today.
+        </p>
       </div>
 
-
-
-      {/* Current Subscription Status */}
-      {currentSubscription && (
-        <div style={{ 
-          marginBottom: '30px',
-          padding: '20px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '10px',
-          border: '1px solid #dee2e6'
-        }}>
-          <h3 style={{ margin: '0 0 15px 0', color: '#333' }}>Current Subscription</h3>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-            gap: '15px' 
-          }}>
-            <div>
-              <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Plan</div>
-              <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#333' }}>
-                {currentSubscription.stripe_products?.name || 'N/A'}
-              </div>
-            </div>
-            
-            <div>
-              <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Status</div>
-              <div style={{ 
-                fontSize: '14px', 
-                fontWeight: 'bold',
-                color: getStatusColor(currentSubscription.status)
-              }}>
-                {getStatusLabel(currentSubscription.status)}
-              </div>
-            </div>
-            
-            <div>
-              <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Billing Cycle</div>
-              <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#333' }}>
-                {currentSubscription.billing_interval === 'month' ? 'Monthly' : 'Yearly'}
-              </div>
-            </div>
-            
-            <div>
-              <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Current Period</div>
-              <div style={{ fontSize: '14px', color: '#333' }}>
-                {formatDate(currentSubscription.current_period_start)} - {formatDate(currentSubscription.current_period_end)}
-              </div>
-            </div>
-            
-            {userLimitInfo && (
-              <div>
-                <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Plan Limit</div>
-                <div style={{ 
-                  fontSize: '16px', 
-                  fontWeight: 'bold',
-                  color: '#007bff'
-                }}>
-                  {userLimitInfo.plan_limit} users
-                </div>
-              </div>
-            )}
-            
-            {userLimitInfo && (
-              <div>
-                <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Active Users</div>
-                <div style={{ 
-                  fontSize: '16px', 
-                  fontWeight: 'bold',
-                  color: userLimitInfo.is_within_limit ? '#28a745' : '#dc3545'
-                }}>
-                  {userLimitInfo.active_count}
-                </div>
-              </div>
-            )}
-            
-
-            
-            {currentSubscription.cancel_at_period_end && (
-              <div style={{ 
-                gridColumn: '1 / -1',
-                padding: '10px',
-                backgroundColor: '#fff3cd',
-                border: '1px solid #ffeaa7',
-                borderRadius: '5px',
-                color: '#856404'
-              }}>
-                ⚠️ This subscription will be canceled at the end of the current billing period.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-
-
-      {/* Subscription Plans Grid */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-        gap: '20px',
-        marginBottom: '30px'
+      {/* Subscription Call-to-Action */}
+      <div style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        borderRadius: '16px',
+        padding: '32px',
+        marginBottom: '32px',
+        color: 'white',
+        boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        {subscriptionPlans.map((plan) => (
-          <div
-            key={plan.stripe_product_id}
-            style={{
-              border: plan.is_popular ? '2px solid #007bff' : '1px solid #dee2e6',
-              borderRadius: '10px',
-              padding: '25px',
-              backgroundColor: 'white',
-              position: 'relative',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-              transition: 'transform 0.2s, box-shadow 0.2s',
-              cursor: 'pointer',
-              transform: selectedPlan?.stripe_product_id === plan.stripe_product_id ? 'scale(1.02)' : 'scale(1)',
-              boxShadow: selectedPlan?.stripe_product_id === plan.stripe_product_id ? '0 4px 20px rgba(0,0,0,0.15)' : '0 2px 10px rgba(0,0,0,0.1)'
-            }}
-            onClick={() => handlePlanSelect(plan)}
-          >
-            {/* Popular Badge */}
-            {plan.is_popular && (
-              <div style={{
-                position: 'absolute',
-                top: '-10px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                backgroundColor: '#007bff',
-                color: 'white',
-                padding: '5px 15px',
-                borderRadius: '15px',
-                fontSize: '12px',
-                fontWeight: 'bold'
-              }}>
-                Most Popular
-              </div>
-            )}
-
-            {/* Trial Badge */}
-            {plan.is_trial && (
-              <div style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                padding: '3px 8px',
-                borderRadius: '10px',
-                fontSize: '10px',
-                fontWeight: 'bold'
-              }}>
-                Trial
-              </div>
-            )}
-
-            {/* Plan Header */}
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>{plan.name}</h3>
-              <p style={{ margin: '0', color: '#666', fontSize: '14px' }}>{plan.description}</p>
-            </div>
-
-            {/* Price */}
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                gap: '15px'
-              }}>
-                {/* Monthly Price */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#007bff' }}>
-                    {formatPrice(plan.price_cents_monthly)}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#666' }}>
-                    per month
-                  </div>
-                </div>
-                
-                {/* Divider */}
-                <div style={{ 
-                  width: '1px', 
-                  height: '30px', 
-                  backgroundColor: '#dee2e6' 
-                }}></div>
-                
-                {/* Yearly Price */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#28a745' }}>
-                    {formatPrice(plan.price_cents_yearly)}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#666' }}>
-                    per year
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-
-            {/* Subscribe Button */}
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <h2 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: 'bold' }}>
+            🚀 Upgrade Your Plan
+          </h2>
+          <p style={{ margin: '0 0 24px 0', fontSize: '16px', opacity: 0.9 }}>
+            Unlock premium features and scale your team with our professional plans.
+          </p>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleSubscribe(plan)
-              }}
+              onClick={() => onNavigate('account-billing')}
               style={{
-                width: '100%',
-                padding: '12px',
-                backgroundColor: selectedPlan?.stripe_product_id === plan.stripe_product_id ? '#28a745' : '#007bff',
-                color: 'white',
+                background: 'white',
+                color: '#667eea',
                 border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
+                padding: '12px 24px',
+                borderRadius: '8px',
                 fontSize: '16px',
-                fontWeight: 'bold',
-                transition: 'background-color 0.2s'
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'transform 0.2s, box-shadow 0.2s'
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#0056b3'
+                e.target.style.transform = 'translateY(-2px)'
+                e.target.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.3)'
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = selectedPlan?.stripe_product_id === plan.stripe_product_id ? '#28a745' : '#007bff'
+                e.target.style.transform = 'translateY(0)'
+                e.target.style.boxShadow = 'none'
               }}
             >
-              {selectedPlan?.stripe_product_id === plan.stripe_product_id ? 'Selected' : 'Subscribe'}
+              View Plans
+            </button>
+            <button
+              onClick={() => console.log('Contact sales')}
+              style={{
+                background: 'transparent',
+                color: 'white',
+                border: '2px solid white',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'white'
+                e.target.style.color = '#667eea'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'transparent'
+                e.target.style.color = 'white'
+              }}
+            >
+              Contact Sales
             </button>
           </div>
-        ))}
+        </div>
+        <div style={{
+          position: 'absolute',
+          top: '-20px',
+          right: '-20px',
+          fontSize: '120px',
+          opacity: 0.1,
+          zIndex: 1
+        }}>
+          💎
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '20px',
+        marginBottom: '32px'
+      }}>
+        <StatCard 
+          title="Total Shifts"
+          value={stats.totalShifts}
+          subtitle="This month"
+          color="#667eea"
+        />
+        <StatCard 
+          title="Active Shifts"
+          value={stats.activeShifts}
+          subtitle="Currently running"
+          color="#38a169"
+        />
+        <StatCard 
+          title="Total Employees"
+          value={stats.totalEmployees}
+          subtitle="Registered users"
+          color="#ed8936"
+        />
+        <StatCard 
+          title="Active Employees"
+          value={stats.activeEmployees}
+          subtitle="Currently working"
+          color="#e53e3e"
+        />
+      </div>
+
+      {/* Quick Actions */}
+      <div style={{ marginBottom: '32px' }}>
+        <h2 style={{ margin: '0 0 20px 0', color: '#2d3748', fontSize: '24px', fontWeight: '600' }}>
+          Quick Actions
+        </h2>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '20px'
+        }}>
+          <QuickAction
+            title="Create Shift"
+            description="Schedule a new shift for your team"
+            icon="📅"
+            onClick={() => onNavigate('shifts')}
+          />
+          <QuickAction
+            title="Invite Employees"
+            description="Send invitations to new team members"
+            icon="👤"
+            onClick={() => onNavigate('employees')}
+          />
+          <QuickAction
+            title="View Schedule"
+            description="See this week's shift schedule"
+            icon="📋"
+            onClick={() => onNavigate('shifts')}
+          />
+          <QuickAction
+            title="Manage Roles & Locations"
+            description="Configure user roles and work locations"
+            icon="👥"
+            onClick={() => onNavigate('roles-locations')}
+          />
+        </div>
       </div>
 
 
+
+      {/* Upcoming Shifts */}
+      <div>
+        <h2 style={{ margin: '0 0 20px 0', color: '#2d3748', fontSize: '24px', fontWeight: '600' }}>
+          Upcoming Shifts
+        </h2>
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          padding: '24px',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ fontSize: '20px', marginRight: '12px' }}>🌅</span>
+            <div>
+              <div style={{ fontWeight: '600', color: '#2d3748' }}>Morning Shift</div>
+              <div style={{ fontSize: '14px', color: '#718096' }}>Tomorrow, 6:00 AM - 2:00 PM • 4 employees</div>
+            </div>
+            <div style={{ marginLeft: 'auto', fontSize: '12px', color: '#718096' }}>Tomorrow</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ fontSize: '20px', marginRight: '12px' }}>🌆</span>
+            <div>
+              <div style={{ fontWeight: '600', color: '#2d3748' }}>Evening Shift</div>
+              <div style={{ fontSize: '14px', color: '#718096' }}>Tomorrow, 2:00 PM - 10:00 PM • 3 employees</div>
+            </div>
+            <div style={{ marginLeft: 'auto', fontSize: '12px', color: '#718096' }}>Tomorrow</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: '20px', marginRight: '12px' }}>🌙</span>
+            <div>
+              <div style={{ fontWeight: '600', color: '#2d3748' }}>Night Shift</div>
+              <div style={{ fontSize: '14px', color: '#718096' }}>Wednesday, 10:00 PM - 6:00 AM • 2 employees</div>
+            </div>
+            <div style={{ marginLeft: 'auto', fontSize: '12px', color: '#718096' }}>Wednesday</div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

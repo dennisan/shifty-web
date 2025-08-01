@@ -3,7 +3,7 @@ import { useAuth } from '../AuthContext'
 import Sidebar from './Sidebar'
 import Header from './Header'
 
-const Layout = ({ children }) => {
+const Layout = ({ children, onNavigate, currentView }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { userData, tenantData } = useAuth()
 
@@ -48,6 +48,8 @@ const Layout = ({ children }) => {
         onClose={closeSidebar}
         userData={userData}
         tenantData={tenantData}
+        onNavigate={onNavigate}
+        currentView={currentView}
       />
 
       {/* Main content */}
@@ -56,8 +58,7 @@ const Layout = ({ children }) => {
         style={{
           padding: '20px',
           minHeight: 'calc(100vh - 64px)',
-          backgroundColor: '#f8f9fa',
-          marginLeft: '0' // Will be overridden by CSS for desktop
+          backgroundColor: '#f8f9fa'
         }}
       >
         {children}
@@ -75,7 +76,7 @@ const Layout = ({ children }) => {
         }}
       >
         <p style={{ margin: 0 }}>
-          © 2025 Shifty. All rights reserved.
+          © 2025 Signal Peak Software. All rights reserved.
         </p>
       </footer>
     </div>

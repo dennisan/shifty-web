@@ -8,25 +8,12 @@ export const fetchUserAndTenantInfo = async (userId) => {
     console.log('Fetching user data from users table...')
     
     // Add timeout to prevent hanging
-    const userQueryPromise = supabase
+    const userQueryPromise = supabaseService
       .from('users')
       .select(`
         *,
-        roles:role_id (
-          id,
-          name,
-          license,
-          license_exp,
-          is_admin,
-          can_manage_shifts
-        ),
-        locations:primary_location_id (
-          id,
-          name,
-          address,
-          type,
-          is_default
-        )
+        roles:role_id (*),
+        locations:primary_location_id (*)
       `)
       .eq('id', userId)
       .single()
@@ -41,7 +28,7 @@ export const fetchUserAndTenantInfo = async (userId) => {
       timeoutPromise
     ])
 
-    console.log('User query result:', { userData, userError })
+    // console.log('User query result:', { userData, userError })
 
     if (userError) {
       console.error('Error fetching user data:', userError)
@@ -83,7 +70,7 @@ export const fetchUserAndTenantInfo = async (userId) => {
       timeoutPromise
     ])
 
-    console.log('Tenant query result:', { tenantData, tenantError })
+    // console.log('Tenant query result:', { tenantData, tenantError })
 
     if (tenantError) {
       console.error('Error fetching tenant data:', tenantError)
