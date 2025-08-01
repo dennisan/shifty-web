@@ -112,27 +112,44 @@ const Dashboard = ({ onNavigate }) => {
     fetchDashboardStats()
   }, [fetchDashboardStats])
 
-  const StatCard = ({ title, value, subtitle, color = '#667eea' }) => (
-    <div style={{
-      background: 'white',
-      borderRadius: '12px',
-      padding: '24px',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      border: `3px solid ${color}`,
-      flex: 1,
-      minWidth: '180px'
-    }}>
-      <h3 style={{ margin: '0 0 8px 0', color: '#2d3748', fontSize: '16px', fontWeight: '600' }}>
-        {title}
-      </h3>
-      <div style={{ fontSize: '32px', fontWeight: 'bold', color: color, marginBottom: '4px' }}>
-        {loading ? '...' : value}
+  const StatCard = ({ title, value, subtitle, color = '#667eea' }) => {
+    const isMobile = window.innerWidth <= 768
+    
+    return (
+      <div style={{
+        background: 'white',
+        borderRadius: '12px',
+        padding: isMobile ? '16px' : '24px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        border: `3px solid ${color}`,
+        flex: 1,
+        minWidth: isMobile ? '120px' : '180px'
+      }}>
+        <h3 style={{ 
+          margin: '0 0 8px 0', 
+          color: '#2d3748', 
+          fontSize: isMobile ? '14px' : '16px', 
+          fontWeight: '600'
+        }}>
+          {title}
+        </h3>
+        <div style={{ 
+          fontSize: isMobile ? '24px' : '32px', 
+          fontWeight: 'bold', 
+          color: color, 
+          marginBottom: '4px'
+        }}>
+          {loading ? '...' : value}
+        </div>
+        <div style={{ 
+          fontSize: isMobile ? '12px' : '14px', 
+          color: '#718096'
+        }}>
+          {subtitle}
+        </div>
       </div>
-      <div style={{ fontSize: '14px', color: '#718096' }}>
-        {subtitle}
-      </div>
-    </div>
-  )
+    )
+  }
 
   const QuickAction = ({ title, description, icon, onClick }) => (
     <div 
@@ -220,30 +237,6 @@ const Dashboard = ({ onNavigate }) => {
             >
               View Plans
             </button>
-            <button
-              onClick={() => console.log('Contact sales')}
-              style={{
-                background: 'transparent',
-                color: 'white',
-                border: '2px solid white',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'white'
-                e.target.style.color = '#667eea'
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'transparent'
-                e.target.style.color = 'white'
-              }}
-            >
-              Contact Sales
-            </button>
           </div>
         </div>
         <div style={{
@@ -261,16 +254,11 @@ const Dashboard = ({ onNavigate }) => {
       {/* Stats Grid */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
         gap: '20px',
         marginBottom: '32px'
       }}>
-        <StatCard 
-          title="Total Shifts"
-          value={stats.totalShifts}
-          subtitle="All time"
-          color="#667eea"
-        />
+
         <StatCard 
           title="Upcoming Shifts"
           value={stats.upcomingShifts}

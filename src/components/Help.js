@@ -179,92 +179,86 @@ const Help = () => {
 
   return (
     <div style={{ 
-      padding: '20px', 
+      padding: window.innerWidth <= 768 ? '10px' : '20px', 
       maxWidth: '1200px', 
       margin: '0 auto',
       backgroundColor: '#f8f9fa',
       minHeight: 'calc(100vh - 64px)'
     }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '40px',
-        borderRadius: '12px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-        <h1 style={{ 
-          color: '#2c3e50', 
-          fontSize: '32px', 
-          fontWeight: '700', 
-          marginBottom: '30px',
-          textAlign: 'center'
+      <h1 style={{ 
+        color: '#2c3e50', 
+        fontSize: '32px', 
+        fontWeight: '700', 
+        marginBottom: '30px',
+        textAlign: 'center'
+      }}>
+        Help and Documentation
+      </h1>
+
+      {/* Table of Contents */}
+      {toc.length > 0 && (
+        <div style={{
+          marginBottom: '40px',
+          padding: '20px',
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          border: '1px solid #e1e5e9',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
         }}>
-          Help and Documentation
-        </h1>
-
-        {/* Table of Contents */}
-        {toc.length > 0 && (
-          <div style={{
-            marginBottom: '40px',
-            padding: '20px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            border: '1px solid #e1e5e9'
+          <h3 style={{
+            color: '#2c3e50',
+            fontSize: '18px',
+            fontWeight: '600',
+            marginBottom: '15px',
+            marginTop: '0'
           }}>
-            <h3 style={{
-              color: '#2c3e50',
-              fontSize: '18px',
-              fontWeight: '600',
-              marginBottom: '15px',
-              marginTop: '0'
-            }}>
-              📋 Table of Contents
-            </h3>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0px'
-            }}>
-              {toc.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => scrollToSection(item.id)}
-                  style={{
-                    textAlign: 'left',
-                    background: 'transparent',
-                    border: 'none',
-                    padding: '8px 12px',
-                    cursor: 'pointer',
-                    color: '#667eea',
-                    fontSize: '14px',
-                    fontWeight: item.level === 2 ? '600' : '400',
-                    marginLeft: item.level === 3 ? '20px' : '0',
-                    borderRadius: '4px',
-                    transition: 'all 0.2s',
-                    display: 'block',
-                    width: '100%'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = '#e8f2ff'
-                    e.target.style.color = '#4a5568'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent'
-                    e.target.style.color = '#667eea'
-                  }}
-                >
-                  {item.level === 2 ? '📖' : '📄'} {item.title}
-                </button>
-              ))}
-            </div>
+            📋 Table of Contents
+          </h3>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0px'
+          }}>
+            {toc.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => scrollToSection(item.id)}
+                style={{
+                  textAlign: 'left',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  color: '#667eea',
+                  fontSize: '14px',
+                  fontWeight: item.level === 2 ? '600' : '400',
+                  marginLeft: item.level === 3 ? '20px' : '0',
+                  borderRadius: '4px',
+                  transition: 'all 0.2s',
+                  display: 'block',
+                  width: '100%'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#e8f2ff'
+                  e.target.style.color = '#4a5568'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent'
+                  e.target.style.color = '#667eea'
+                }}
+              >
+                {item.level === 2 ? '📖' : '📄'} {item.title}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
+      )}
 
-        <ReactMarkdown 
-          components={markdownComponents}
-        >
-          {markdownContent}
-        </ReactMarkdown>
-      </div>
+      <ReactMarkdown 
+        components={markdownComponents}
+      >
+        {markdownContent}
+      </ReactMarkdown>
     </div>
   )
 }

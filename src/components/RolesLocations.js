@@ -347,32 +347,48 @@ const RolesLocations = () => {
       {/* Stats */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
         gap: '20px', 
         marginBottom: '32px' 
       }}>
         <div style={{
           backgroundColor: 'white',
-          padding: '24px',
+          padding: window.innerWidth <= 768 ? '16px' : '24px',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           border: '3px solid #667eea'
         }}>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Total Roles</div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#2d3748' }}>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            color: '#666', 
+            marginBottom: '8px' 
+          }}>Total Roles</div>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '24px' : '32px', 
+            fontWeight: 'bold', 
+            color: '#2d3748' 
+          }}>
             {roles.length}
           </div>
         </div>
         
         <div style={{
           backgroundColor: 'white',
-          padding: '24px',
+          padding: window.innerWidth <= 768 ? '16px' : '24px',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           border: '3px solid #28a745'
         }}>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Total Locations</div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#28a745' }}>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            color: '#666', 
+            marginBottom: '8px' 
+          }}>Total Locations</div>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '24px' : '32px', 
+            fontWeight: 'bold', 
+            color: '#28a745' 
+          }}>
             {locations.length}
           </div>
         </div>
@@ -387,7 +403,7 @@ const RolesLocations = () => {
           marginBottom: '20px' 
         }}>
           <h2 style={{ margin: 0, color: '#2d3748', fontSize: '24px', fontWeight: 'bold' }}>
-            Roles Management
+            Roles
           </h2>
           <button
             onClick={() => setShowRoleForm(true)}
@@ -535,42 +551,46 @@ const RolesLocations = () => {
           ) : (
             <div>
               {/* Roles Table Header */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                gap: '20px',
-                padding: '16px 24px',
-                backgroundColor: '#f8f9fa',
-                borderBottom: '1px solid #e2e8f0',
-                fontWeight: '600',
-                fontSize: '14px',
-                color: '#2d3748'
-              }}>
-                <div 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleRoleSort('name')}
-                >
-                  Role Name
-                  {roleSortField === 'name' && (
-                    <span style={{ marginLeft: '5px' }}>
-                      {roleSortDirection === 'asc' ? ' ↑' : ' ↓'}
-                    </span>
-                  )}
+              {window.innerWidth <= 768 ? (
+                <div></div>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 1fr 1fr 1fr',
+                  gap: '20px',
+                  padding: '16px 24px',
+                  backgroundColor: '#f8f9fa',
+                  borderBottom: '1px solid #e2e8f0',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  color: '#2d3748'
+                }}>
+                  <div 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleRoleSort('name')}
+                  >
+                    Role Name
+                    {roleSortField === 'name' && (
+                      <span style={{ marginLeft: '5px' }}>
+                        {roleSortDirection === 'asc' ? ' ↑' : ' ↓'}
+                      </span>
+                    )}
+                  </div>
+                  <div>Admin</div>
+                  <div 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleRoleSort('can_manage_shifts')}
+                  >
+                    Shift Manager
+                    {roleSortField === 'can_manage_shifts' && (
+                      <span style={{ marginLeft: '5px' }}>
+                        {roleSortDirection === 'asc' ? ' ↑' : ' ↓'}
+                      </span>
+                    )}
+                  </div>
+                  <div>Created</div>
                 </div>
-                <div>Admin</div>
-                <div 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleRoleSort('can_manage_shifts')}
-                >
-                  Shift Manager
-                  {roleSortField === 'can_manage_shifts' && (
-                    <span style={{ marginLeft: '5px' }}>
-                      {roleSortDirection === 'asc' ? ' ↑' : ' ↓'}
-                    </span>
-                  )}
-                </div>
-                <div>Created</div>
-              </div>
+              )}
 
               {/* Roles Table Body */}
               <div>
@@ -578,9 +598,6 @@ const RolesLocations = () => {
                   <div 
                     key={role.id}
                     style={{
-                      display: 'grid',
-                      gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                      gap: '20px',
                       padding: '16px 24px',
                       borderBottom: '1px solid #e2e8f0',
                       fontSize: '14px',
@@ -589,44 +606,105 @@ const RolesLocations = () => {
                     onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
                     onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                   >
-                    <div 
-                      style={{ 
-                        fontWeight: '600', 
-                        color: '#2d3748',
-                        cursor: 'pointer',
-                        textDecoration: 'underline'
-                      }}
-                      onClick={() => handleEditRole(role)}
-                    >
-                      {role.name}
-                    </div>
-                    <div>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        backgroundColor: role.is_admin ? '#28a74520' : '#6c757d20',
-                        color: role.is_admin ? '#28a745' : '#6c757d'
+                    {window.innerWidth <= 768 ? (
+                      // Mobile multi-line layout
+                      <div>
+                        {/* Line 1: Role Name */}
+                        <div style={{ 
+                          fontSize: '16px', 
+                          fontWeight: '600', 
+                          color: '#2d3748',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          marginBottom: '8px'
+                        }}
+                        onClick={() => handleEditRole(role)}
+                        >
+                          {role.name}
+                        </div>
+                        
+                        {/* Line 2: Permissions */}
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#666',
+                          marginBottom: '4px',
+                          display: 'flex',
+                          gap: '8px',
+                          flexWrap: 'wrap'
+                        }}>
+                          {role.is_admin && (
+                            <span style={{
+                              padding: '4px 8px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              backgroundColor: '#28a74520',
+                              color: '#28a745'
+                            }}>
+                              Admin
+                            </span>
+                          )}
+                          {role.can_manage_shifts && (
+                            <span style={{
+                              padding: '4px 8px',
+                              borderRadius: '12px',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              backgroundColor: '#28a74520',
+                              color: '#28a745'
+                            }}>
+                              Shift Manager
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      // Desktop grid layout
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '2fr 1fr 1fr 1fr',
+                        gap: '20px'
                       }}>
-                        {role.is_admin ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        backgroundColor: role.can_manage_shifts ? '#28a74520' : '#6c757d20',
-                        color: role.can_manage_shifts ? '#28a745' : '#6c757d'
-                      }}>
-                        {role.can_manage_shifts ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                    <div style={{ color: '#999', fontSize: '12px' }}>
-                      {formatDate(role.created_at)}
-                    </div>
+                        <div 
+                          style={{ 
+                            fontWeight: '600', 
+                            color: '#2d3748',
+                            cursor: 'pointer',
+                            textDecoration: 'underline'
+                          }}
+                          onClick={() => handleEditRole(role)}
+                        >
+                          {role.name}
+                        </div>
+                        <div>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            backgroundColor: role.is_admin ? '#28a74520' : '#6c757d20',
+                            color: role.is_admin ? '#28a745' : '#6c757d'
+                          }}>
+                            {role.is_admin ? 'Yes' : 'No'}
+                          </span>
+                        </div>
+                        <div>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            backgroundColor: role.can_manage_shifts ? '#28a74520' : '#6c757d20',
+                            color: role.can_manage_shifts ? '#28a745' : '#6c757d'
+                          }}>
+                            {role.can_manage_shifts ? 'Yes' : 'No'}
+                          </span>
+                        </div>
+                        <div style={{ color: '#999', fontSize: '12px' }}>
+                          {formatDate(role.created_at)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -644,7 +722,7 @@ const RolesLocations = () => {
           marginBottom: '20px' 
         }}>
           <h2 style={{ margin: 0, color: '#2d3748', fontSize: '24px', fontWeight: 'bold' }}>
-            Locations Management
+            Locations
           </h2>
           <button
             onClick={() => setShowLocationForm(true)}
@@ -816,52 +894,56 @@ const RolesLocations = () => {
           ) : (
             <div>
               {/* Locations Table Header */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 1fr 3fr 1fr',
-                gap: '20px',
-                padding: '16px 24px',
-                backgroundColor: '#f8f9fa',
-                borderBottom: '1px solid #e2e8f0',
-                fontWeight: '600',
-                fontSize: '14px',
-                color: '#2d3748'
-              }}>
-                <div 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleLocationSort('name')}
-                >
-                  Location Name
-                  {locationSortField === 'name' && (
-                    <span style={{ marginLeft: '5px' }}>
-                      {locationSortDirection === 'asc' ? ' ↑' : ' ↓'}
-                    </span>
-                  )}
+              {window.innerWidth <= 768 ? (
+                <div></div>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '2fr 1fr 3fr 1fr',
+                  gap: '20px',
+                  padding: '16px 24px',
+                  backgroundColor: '#f8f9fa',
+                  borderBottom: '1px solid #e2e8f0',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  color: '#2d3748'
+                }}>
+                  <div 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleLocationSort('name')}
+                  >
+                    Location Name
+                    {locationSortField === 'name' && (
+                      <span style={{ marginLeft: '5px' }}>
+                        {locationSortDirection === 'asc' ? ' ↑' : ' ↓'}
+                      </span>
+                    )}
+                  </div>
+                  <div 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleLocationSort('type')}
+                  >
+                    Type
+                    {locationSortField === 'type' && (
+                      <span style={{ marginLeft: '5px' }}>
+                        {locationSortDirection === 'asc' ? ' ↑' : ' ↓'}
+                      </span>
+                    )}
+                  </div>
+                  <div 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleLocationSort('address')}
+                  >
+                    Address
+                    {locationSortField === 'address' && (
+                      <span style={{ marginLeft: '5px' }}>
+                        {locationSortDirection === 'asc' ? ' ↑' : ' ↓'}
+                      </span>
+                    )}
+                  </div>
+                  <div>Created</div>
                 </div>
-                <div 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleLocationSort('type')}
-                >
-                  Type
-                  {locationSortField === 'type' && (
-                    <span style={{ marginLeft: '5px' }}>
-                      {locationSortDirection === 'asc' ? ' ↑' : ' ↓'}
-                    </span>
-                  )}
-                </div>
-                <div 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => handleLocationSort('address')}
-                >
-                  Address
-                  {locationSortField === 'address' && (
-                    <span style={{ marginLeft: '5px' }}>
-                      {locationSortDirection === 'asc' ? ' ↑' : ' ↓'}
-                    </span>
-                  )}
-                </div>
-                <div>Created</div>
-              </div>
+              )}
 
               {/* Locations Table Body */}
               <div>
@@ -869,9 +951,6 @@ const RolesLocations = () => {
                   <div 
                     key={location.id}
                     style={{
-                      display: 'grid',
-                      gridTemplateColumns: '2fr 1fr 3fr 1fr',
-                      gap: '20px',
                       padding: '16px 24px',
                       borderBottom: '1px solid #e2e8f0',
                       fontSize: '14px',
@@ -880,26 +959,70 @@ const RolesLocations = () => {
                     onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
                     onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                   >
-                    <div 
-                      style={{ 
-                        fontWeight: '600', 
-                        color: '#2d3748',
-                        cursor: 'pointer',
-                        textDecoration: 'underline'
-                      }}
-                      onClick={() => handleEditLocation(location)}
-                    >
-                      {location.name}
-                    </div>
-                    <div style={{ color: '#666' }}>
-                      {location.type || 'N/A'}
-                    </div>
-                    <div style={{ color: '#666' }}>
-                      {location.address || 'N/A'}
-                    </div>
-                    <div style={{ color: '#999', fontSize: '12px' }}>
-                      {formatDate(location.created_at)}
-                    </div>
+                    {window.innerWidth <= 768 ? (
+                      // Mobile multi-line layout
+                      <div>
+                        {/* Line 1: Location Name */}
+                        <div style={{ 
+                          fontSize: '16px', 
+                          fontWeight: '600', 
+                          color: '#2d3748',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          marginBottom: '8px'
+                        }}
+                        onClick={() => handleEditLocation(location)}
+                        >
+                          {location.name}
+                        </div>
+                        
+                        {/* Line 2: Address */}
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#666',
+                          marginBottom: '4px'
+                        }}>
+                          <strong>Address:</strong> {location.address || 'N/A'}
+                        </div>
+                        
+                        {/* Line 3: Type */}
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#666',
+                          marginBottom: '0'
+                        }}>
+                          <strong>Type:</strong> {location.type || 'N/A'}
+                        </div>
+                      </div>
+                    ) : (
+                      // Desktop grid layout
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '2fr 1fr 3fr 1fr',
+                        gap: '20px'
+                      }}>
+                        <div 
+                          style={{ 
+                            fontWeight: '600', 
+                            color: '#2d3748',
+                            cursor: 'pointer',
+                            textDecoration: 'underline'
+                          }}
+                          onClick={() => handleEditLocation(location)}
+                        >
+                          {location.name}
+                        </div>
+                        <div style={{ color: '#666' }}>
+                          {location.type || 'N/A'}
+                        </div>
+                        <div style={{ color: '#666' }}>
+                          {location.address || 'N/A'}
+                        </div>
+                        <div style={{ color: '#999', fontSize: '12px' }}>
+                          {formatDate(location.created_at)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -12,6 +12,7 @@ const Shifts = () => {
   const [statusFilter, setStatusFilter] = useState('')
   const [locationFilter, setLocationFilter] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
+  const [filtersCollapsed, setFiltersCollapsed] = useState(true)
 
   useEffect(() => {
     const fetchShifts = async () => {
@@ -104,21 +105,11 @@ const Shifts = () => {
       return { status: 'incomplete', label: 'Incomplete', color: '#ffc107' }
     }
 
-    const now = new Date()
-    const shiftStart = new Date(`${shift.start_date}T${shift.start_time}`)
-    const shiftEnd = new Date(`${shift.start_date}T${shift.end_time}`)
-    
-    // Handle overnight shifts
-    if (shiftEnd < shiftStart) {
-      shiftEnd.setDate(shiftEnd.getDate() + 1)
-    }
-
-    if (now < shiftStart) {
-      return { status: 'upcoming', label: 'Upcoming', color: '#17a2b8' }
-    } else if (now >= shiftStart && now <= shiftEnd) {
-      return { status: 'active', label: 'Active', color: '#28a745' }
+    // Check if shift is filled or open
+    if (!shift.accepted_by || shift.accepted_by.trim() === '') {
+      return { status: 'open', label: 'Open', color: '#28a745' }
     } else {
-      return { status: 'completed', label: 'Completed', color: '#6c757d' }
+      return { status: 'filled', label: 'Filled', color: '#6c757d' }
     }
   }
 
@@ -196,7 +187,7 @@ const Shifts = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A'
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
+      weekday: 'short',
       month: 'short',
       day: 'numeric'
     })
@@ -204,7 +195,13 @@ const Shifts = () => {
 
   const formatTime = (timeString) => {
     if (!timeString) return 'N/A'
-    return timeString
+    // Convert to 12-hour format with AM/PM
+    const time = new Date(`2000-01-01T${timeString}`)
+    return time.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
   }
 
   const formatDateTime = (dateString, timeString) => {
@@ -249,9 +246,8 @@ const Shifts = () => {
   }
 
   const statusCounts = {
-    upcoming: shifts.filter(shift => getShiftStatus(shift).status === 'upcoming').length,
-    active: shifts.filter(shift => getShiftStatus(shift).status === 'active').length,
-    completed: shifts.filter(shift => getShiftStatus(shift).status === 'completed').length,
+    open: shifts.filter(shift => getShiftStatus(shift).status === 'open').length,
+    filled: shifts.filter(shift => getShiftStatus(shift).status === 'filled').length,
     incomplete: shifts.filter(shift => getShiftStatus(shift).status === 'incomplete').length
   }
 
@@ -270,59 +266,75 @@ const Shifts = () => {
       {/* Stats */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
         gap: '20px', 
         marginBottom: '32px' 
       }}>
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          border: '3px solid #667eea'
-        }}>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Total Shifts</div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#2d3748' }}>
-            {shifts.length}
+        {/* Total Shifts - Desktop Only */}
+        {window.innerWidth > 768 && (
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            border: '3px solid #667eea'
+          }}>
+            <div style={{ 
+              fontSize: '14px', 
+              color: '#666', 
+              marginBottom: '8px' 
+            }}>Total Shifts</div>
+            <div style={{ 
+              fontSize: '32px', 
+              fontWeight: 'bold', 
+              color: '#2d3748' 
+            }}>
+              {shifts.length}
+            </div>
           </div>
-        </div>
+        )}
         
+        {/* Open Shifts - Always Show */}
         <div style={{
           backgroundColor: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          border: '3px solid #17a2b8'
-        }}>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Upcoming</div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#17a2b8' }}>
-            {statusCounts.upcoming}
-          </div>
-        </div>
-
-        <div style={{
-          backgroundColor: 'white',
-          padding: '24px',
+          padding: window.innerWidth <= 768 ? '16px' : '24px',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           border: '3px solid #28a745'
         }}>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Active</div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#28a745' }}>
-            {statusCounts.active}
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            color: '#666', 
+            marginBottom: '8px' 
+          }}>Open</div>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '24px' : '32px', 
+            fontWeight: 'bold', 
+            color: '#28a745' 
+          }}>
+            {statusCounts.open}
           </div>
         </div>
 
+        {/* Filled Shifts - Always Show */}
         <div style={{
           backgroundColor: 'white',
-          padding: '24px',
+          padding: window.innerWidth <= 768 ? '16px' : '24px',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           border: '3px solid #6c757d'
         }}>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Completed</div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#6c757d' }}>
-            {statusCounts.completed}
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            color: '#666', 
+            marginBottom: '8px' 
+          }}>Filled</div>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '24px' : '32px', 
+            fontWeight: 'bold', 
+            color: '#6c757d' 
+          }}>
+            {statusCounts.filled}
           </div>
         </div>
       </div>
@@ -335,8 +347,47 @@ const Shifts = () => {
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         marginBottom: '20px'
       }}>
+        {/* Mobile Filter Toggle */}
+        {window.innerWidth <= 768 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px'
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#2d3748'
+            }}>
+              Filters
+            </h3>
+            <button
+              onClick={() => setFiltersCollapsed(!filtersCollapsed)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                fontSize: '14px',
+                color: '#667eea',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              {filtersCollapsed ? 'Show Filters' : 'Hide Filters'}
+              <span style={{ fontSize: '12px' }}>
+                {filtersCollapsed ? '▼' : '▲'}
+              </span>
+            </button>
+          </div>
+        )}
+        
         <div style={{ 
-          display: 'grid', 
+          display: window.innerWidth <= 768 && filtersCollapsed ? 'none' : 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
           gap: '15px',
           alignItems: 'end'
@@ -363,9 +414,8 @@ const Shifts = () => {
               }}
             >
               <option value="">All Status</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
+              <option value="open">Open</option>
+              <option value="filled">Filled</option>
               <option value="incomplete">Incomplete</option>
             </select>
           </div>
@@ -460,15 +510,7 @@ const Shifts = () => {
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden'
       }}>
-        <div style={{
-          padding: '20px 24px',
-          borderBottom: '1px solid #e2e8f0',
-          backgroundColor: '#f8f9fa'
-        }}>
-          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#2d3748' }}>
-            Shifts Directory ({getFilteredAndSortedShifts().length} shifts)
-          </h2>
-        </div>
+
 
         {shifts.length === 0 ? (
           <div style={{ 
@@ -481,85 +523,100 @@ const Shifts = () => {
         ) : (
           <div>
             {/* Table Header */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr',
-              gap: '15px',
-              padding: '16px 24px',
-              backgroundColor: '#f8f9fa',
-              borderBottom: '1px solid #e2e8f0',
-              fontWeight: '600',
-              fontSize: '14px',
-              color: '#2d3748'
-            }}>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('description')}
-              >
-                Description
-                {sortField === 'description' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
+            {window.innerWidth <= 768 ? (
+              <div></div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
+                gap: '15px',
+                padding: '16px 24px',
+                backgroundColor: '#f8f9fa',
+                borderBottom: '1px solid #e2e8f0',
+                fontWeight: '600',
+                fontSize: '14px',
+                color: '#2d3748'
+              }}>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('description')}
+                >
+                  Description
+                  {sortField === 'description' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('start_date')}
+                >
+                  Date
+                  {sortField === 'start_date' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('start_time')}
+                >
+                  Time
+                  {sortField === 'start_time' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('location_name')}
+                >
+                  Location
+                  {sortField === 'location_name' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('role_name')}
+                >
+                  Role
+                  {sortField === 'role_name' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('posted_by_name')}
+                >
+                  Posted By
+                  {sortField === 'posted_by_name' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('accepted_by_name')}
+                >
+                  Assigned To
+                  {sortField === 'accepted_by_name' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div>Status</div>
               </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('start_date')}
-              >
-                Date
-                {sortField === 'start_date' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('start_time')}
-              >
-                Time
-                {sortField === 'start_time' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('location_name')}
-              >
-                Location
-                {sortField === 'location_name' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('role_name')}
-              >
-                Role
-                {sortField === 'role_name' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('accepted_by_name')}
-              >
-                Assigned To
-                {sortField === 'accepted_by_name' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div>Status</div>
-            </div>
+            )}
 
             {/* Table Body */}
             <div>
@@ -569,9 +626,6 @@ const Shifts = () => {
                   <div 
                     key={shift.id}
                     style={{
-                      display: 'grid',
-                      gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr',
-                      gap: '15px',
                       padding: '16px 24px',
                       borderBottom: '1px solid #e2e8f0',
                       fontSize: '14px',
@@ -580,39 +634,139 @@ const Shifts = () => {
                     onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
                     onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                   >
-                    <div style={{ fontWeight: '600', color: '#2d3748' }}>
-                      {shift.description || 'No description'}
-                    </div>
-                    <div style={{ color: '#666' }}>
-                      {formatDate(shift.start_date)}
-                    </div>
-                    <div style={{ color: '#666' }}>
-                      {shift.start_time && shift.end_time ? 
-                        `${formatTime(shift.start_time)} - ${formatTime(shift.end_time)}` : 
-                        'N/A'
-                      }
-                    </div>
-                    <div style={{ color: '#666' }}>
-                      {shift.location_name}
-                    </div>
-                    <div style={{ color: '#666' }}>
-                      {shift.role_name}
-                    </div>
-                    <div style={{ color: '#666' }}>
-                      {shift.accepted_by_name}
-                    </div>
-                    <div>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        backgroundColor: status.color + '20',
-                        color: status.color
+                    {window.innerWidth <= 768 ? (
+                      // Mobile 2-line layout
+                      <div>
+                        {/* Line 1: Date, Time and Status */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: '8px'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: '12px',
+                            fontSize: '14px',
+                            color: '#2d3748',
+                            flex: 1,
+                            marginRight: '12px'
+                          }}>
+                            <div style={{ fontWeight: '600' }}>
+                              {formatDate(shift.start_date)} • {shift.start_time && shift.end_time ? 
+                                `${formatTime(shift.start_time)} - ${formatTime(shift.end_time)}` : 
+                                'N/A'
+                              }
+                            </div>
+                          </div>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            backgroundColor: status.color + '20',
+                            color: status.color,
+                            flexShrink: 0
+                          }}>
+                            {status.label}
+                          </span>
+                        </div>
+                        
+                        {/* Line 2: Location */}
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#666',
+                          marginBottom: '4px'
+                        }}>
+                          <strong>Location:</strong> {shift.location_name}
+                        </div>
+                        
+                        {/* Line 3: Role */}
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#666',
+                          marginBottom: '4px'
+                        }}>
+                          <strong>Role:</strong> {shift.role_name}
+                        </div>
+                        
+                        {/* Line 4: Posted By */}
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#666',
+                          marginBottom: '4px'
+                        }}>
+                          <strong>Posted By:</strong> {shift.posted_by_name}
+                        </div>
+                        
+                        {/* Line 5: Assigned (only if filled) */}
+                        {status.status === 'filled' && (
+                          <div style={{
+                            fontSize: '12px',
+                            color: '#666',
+                            marginBottom: shift.description ? '8px' : '0'
+                          }}>
+                            <strong>Assigned:</strong> {shift.accepted_by_name}
+                          </div>
+                        )}
+                        
+                        {/* Line 6: Description (if exists) */}
+                        {shift.description && (
+                          <div style={{
+                            fontSize: '12px',
+                            color: '#666',
+                            fontStyle: 'italic'
+                          }}>
+                            <strong>Description:</strong> {shift.description}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      // Desktop grid layout
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr',
+                        gap: '15px'
                       }}>
-                        {status.label}
-                      </span>
-                    </div>
+                        <div style={{ fontWeight: '600', color: '#2d3748' }}>
+                          {shift.description || 'No description'}
+                        </div>
+                        <div style={{ color: '#666' }}>
+                          {formatDate(shift.start_date)}
+                        </div>
+                        <div style={{ color: '#666' }}>
+                          {shift.start_time && shift.end_time ? 
+                            `${formatTime(shift.start_time)} - ${formatTime(shift.end_time)}` : 
+                            'N/A'
+                          }
+                        </div>
+                        <div style={{ color: '#666' }}>
+                          {shift.location_name}
+                        </div>
+                        <div style={{ color: '#666' }}>
+                          {shift.role_name}
+                        </div>
+                        <div style={{ color: '#666' }}>
+                          {shift.posted_by_name}
+                        </div>
+                        <div style={{ color: '#666' }}>
+                          {status.status === 'filled' ? shift.accepted_by_name : '-'}
+                        </div>
+                        <div>
+                          <span style={{
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            backgroundColor: status.color + '20',
+                            color: status.color
+                          }}>
+                            {status.label}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )
               })}

@@ -12,6 +12,7 @@ const Employees = () => {
   const [roleFilter, setRoleFilter] = useState('')
   const [locationFilter, setLocationFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [filtersCollapsed, setFiltersCollapsed] = useState(true)
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -190,38 +191,54 @@ const Employees = () => {
       {/* Stats */}
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
         gap: '20px', 
         marginBottom: '32px' 
       }}>
         <div style={{
           backgroundColor: 'white',
-          padding: '24px',
+          padding: window.innerWidth <= 768 ? '16px' : '24px',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           border: '3px solid #667eea'
         }}>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Total Employees</div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#2d3748' }}>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            color: '#666', 
+            marginBottom: '8px' 
+          }}>Total Employees</div>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '24px' : '32px', 
+            fontWeight: 'bold', 
+            color: '#2d3748' 
+          }}>
             {employees.length}
           </div>
         </div>
         
         <div style={{
           backgroundColor: 'white',
-          padding: '24px',
+          padding: window.innerWidth <= 768 ? '16px' : '24px',
           borderRadius: '12px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           border: '3px solid #28a745'
         }}>
-          <div style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>Active Employees</div>
-          <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#28a745' }}>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+            color: '#666', 
+            marginBottom: '8px' 
+          }}>Active Employees</div>
+          <div style={{ 
+            fontSize: window.innerWidth <= 768 ? '24px' : '32px', 
+            fontWeight: 'bold', 
+            color: '#28a745' 
+          }}>
             {employees.filter(emp => emp.is_active).length}
           </div>
         </div>
       </div>
 
-      {/* Filters */}
+            {/* Filters */}
       <div style={{
         backgroundColor: 'white',
         padding: '20px',
@@ -229,8 +246,45 @@ const Employees = () => {
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         marginBottom: '20px'
       }}>
-        <div style={{ 
-          display: 'grid', 
+        {/* Mobile Filter Toggle */}
+        {window.innerWidth <= 768 && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px'
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#2d3748'
+            }}>
+              Filters
+            </h3>
+            <button 
+              onClick={() => setFiltersCollapsed(!filtersCollapsed)}
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '14px',
+                color: '#667eea',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}
+            >
+              {filtersCollapsed ? 'Show Filters' : 'Hide Filters'}
+              <span style={{ fontSize: '12px' }}>
+                {filtersCollapsed ? '▼' : '▲'}
+              </span>
+            </button>
+          </div>
+        )}
+        
+        <div style={{
+          display: window.innerWidth <= 768 && filtersCollapsed ? 'none' : 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
           gap: '15px',
           alignItems: 'end'
@@ -352,15 +406,7 @@ const Employees = () => {
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden'
       }}>
-        <div style={{
-          padding: '20px 24px',
-          borderBottom: '1px solid #e2e8f0',
-          backgroundColor: '#f8f9fa'
-        }}>
-          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#2d3748' }}>
-            Employee Directory ({getFilteredAndSortedEmployees().length} employees)
-          </h2>
-        </div>
+
 
         {employees.length === 0 ? (
           <div style={{ 
@@ -373,94 +419,95 @@ const Employees = () => {
         ) : (
           <div>
             {/* Table Header */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 2fr 2fr 3fr 1fr',
-              gap: '20px',
-              padding: '16px 24px',
-              backgroundColor: '#f8f9fa',
-              borderBottom: '1px solid #e2e8f0',
-              fontWeight: '600',
-              fontSize: '14px',
-              color: '#2d3748'
-            }}>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('first_name')}
-              >
-                First Name
-                {sortField === 'first_name' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
+            {window.innerWidth <= 768 ? (
+              <div></div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 2fr 2fr 3fr 1fr',
+                gap: '20px',
+                padding: '16px 24px',
+                backgroundColor: '#f8f9fa',
+                borderBottom: '1px solid #e2e8f0',
+                fontWeight: '600',
+                fontSize: '14px',
+                color: '#2d3748'
+              }}>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('first_name')}
+                >
+                  First Name
+                  {sortField === 'first_name' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('last_name')}
+                >
+                  Last Name
+                  {sortField === 'last_name' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('email')}
+                >
+                  Email
+                  {sortField === 'email' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('role_name')}
+                >
+                  Role
+                  {sortField === 'role_name' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('location_name')}
+                >
+                  Location
+                  {sortField === 'location_name' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
+                <div 
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSort('is_active')}
+                >
+                  Status
+                  {sortField === 'is_active' && (
+                    <span style={{ marginLeft: '5px' }}>
+                      {sortDirection === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('last_name')}
-              >
-                Last Name
-                {sortField === 'last_name' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('email')}
-              >
-                Email
-                {sortField === 'email' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('role_name')}
-              >
-                Role
-                {sortField === 'role_name' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('location_name')}
-              >
-                Location
-                {sortField === 'location_name' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-              <div 
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort('is_active')}
-              >
-                Status
-                {sortField === 'is_active' && (
-                  <span style={{ marginLeft: '5px' }}>
-                    {sortDirection === 'asc' ? ' ↑' : ' ↓'}
-                  </span>
-                )}
-              </div>
-            </div>
+            )}
 
-                         {/* Table Body */}
-             <div>
+            {/* Table Body */}
+            <div>
                {getFilteredAndSortedEmployees().map((employee) => (
                  <div 
                    key={employee.id}
                    style={{
-                     display: 'grid',
-                     gridTemplateColumns: '1fr 1fr 2fr 2fr 3fr 1fr',
-                     gap: '20px',
                      padding: '16px 24px',
                      borderBottom: '1px solid #e2e8f0',
                      fontSize: '14px',
@@ -469,33 +516,99 @@ const Employees = () => {
                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f8f9fa'}
                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                  >
-                   <div style={{ fontWeight: '600', color: '#2d3748' }}>
-                     {employee.first_name}
-                   </div>
-                   <div style={{ fontWeight: '600', color: '#2d3748' }}>
-                     {employee.last_name}
-                   </div>
-                   <div style={{ color: '#666' }}>
-                     {employee.email}
-                   </div>
-                   <div style={{ color: '#666' }}>
-                     {employee.role_name}
-                   </div>
-                   <div style={{ color: '#666' }}>
-                     {employee.location_name}
-                   </div>
-                   <div>
-                     <span style={{
-                       padding: '4px 8px',
-                       borderRadius: '12px',
-                       fontSize: '12px',
-                       fontWeight: '600',
-                       backgroundColor: getStatusColor(employee.is_active) + '20',
-                       color: getStatusColor(employee.is_active)
+                   {window.innerWidth <= 768 ? (
+                     // Mobile multi-line layout
+                     <div>
+                       {/* Line 1: Name and Status */}
+                       <div style={{ 
+                         display: 'flex', 
+                         justifyContent: 'space-between', 
+                         alignItems: 'flex-start', 
+                         marginBottom: '8px' 
+                       }}>
+                         <div style={{ 
+                           fontSize: '16px', 
+                           fontWeight: '600', 
+                           color: '#2d3748' 
+                         }}>
+                           {employee.first_name} {employee.last_name}
+                         </div>
+                         <span style={{
+                           padding: '4px 8px',
+                           borderRadius: '12px',
+                           fontSize: '12px',
+                           fontWeight: '600',
+                           backgroundColor: getStatusColor(employee.is_active) + '20',
+                           color: getStatusColor(employee.is_active),
+                           flexShrink: 0
+                         }}>
+                           {getStatusLabel(employee.is_active)}
+                         </span>
+                       </div>
+                       
+                       {/* Line 2: Email */}
+                       <div style={{
+                         fontSize: '12px',
+                         color: '#666',
+                         marginBottom: '4px'
+                       }}>
+                         <strong>Email:</strong> {employee.email}
+                       </div>
+                       
+                       {/* Line 3: Role */}
+                       <div style={{
+                         fontSize: '12px',
+                         color: '#666',
+                         marginBottom: '4px'
+                       }}>
+                         <strong>Role:</strong> {employee.role_name}
+                       </div>
+                       
+                       {/* Line 4: Location */}
+                       <div style={{
+                         fontSize: '12px',
+                         color: '#666',
+                         marginBottom: '0'
+                       }}>
+                         <strong>Location:</strong> {employee.location_name}
+                       </div>
+                     </div>
+                   ) : (
+                     // Desktop grid layout
+                     <div style={{
+                       display: 'grid',
+                       gridTemplateColumns: '1fr 1fr 2fr 2fr 3fr 1fr',
+                       gap: '20px'
                      }}>
-                       {getStatusLabel(employee.is_active)}
-                     </span>
-                   </div>
+                       <div style={{ fontWeight: '600', color: '#2d3748' }}>
+                         {employee.first_name}
+                       </div>
+                       <div style={{ fontWeight: '600', color: '#2d3748' }}>
+                         {employee.last_name}
+                       </div>
+                       <div style={{ color: '#666' }}>
+                         {employee.email}
+                       </div>
+                       <div style={{ color: '#666' }}>
+                         {employee.role_name}
+                       </div>
+                       <div style={{ color: '#666' }}>
+                         {employee.location_name}
+                       </div>
+                       <div>
+                         <span style={{
+                           padding: '4px 8px',
+                           borderRadius: '12px',
+                           fontSize: '12px',
+                           fontWeight: '600',
+                           backgroundColor: getStatusColor(employee.is_active) + '20',
+                           color: getStatusColor(employee.is_active)
+                         }}>
+                           {getStatusLabel(employee.is_active)}
+                         </span>
+                       </div>
+                     </div>
+                   )}
                  </div>
                ))}
              </div>

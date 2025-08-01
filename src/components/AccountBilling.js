@@ -212,7 +212,7 @@ const AccountBilling = ({ onNavigateToUserView }) => {
       {currentSubscription && (
         <div style={{ 
           marginBottom: '32px',
-          padding: '32px',
+          padding: window.innerWidth <= 768 ? '20px' : '32px',
           border: '3px solid #667eea',
           borderRadius: '16px',
           backgroundColor: 'white',
@@ -224,7 +224,7 @@ const AccountBilling = ({ onNavigateToUserView }) => {
             <h3 style={{ margin: '0 0 20px 0', fontSize: '24px', fontWeight: 'bold', color: '#2d3748' }}>Current Subscription</h3>
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+            gridTemplateColumns: window.innerWidth <= 768 ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(200px, 1fr))', 
             gap: '15px' 
           }}>
             <div>
@@ -253,9 +253,9 @@ const AccountBilling = ({ onNavigateToUserView }) => {
             </div>
             
             <div>
-              <div style={{ fontSize: '14px', color: '#718096', marginBottom: '5px' }}>Current Period</div>
+              <div style={{ fontSize: '14px', color: '#718096', marginBottom: '5px' }}>Ends</div>
               <div style={{ fontSize: '14px', color: '#2d3748' }}>
-                {formatDate(currentSubscription.current_period_start)} - {formatDate(currentSubscription.current_period_end)}
+                {formatDate(currentSubscription.current_period_end)}
               </div>
             </div>
             
