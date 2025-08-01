@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient'
+import { supabase, supabaseService } from '../supabaseClient'
 
 export const fetchUserAndTenantInfo = async (userId) => {
   try {
@@ -72,7 +72,7 @@ export const fetchUserAndTenantInfo = async (userId) => {
     // Then, fetch tenant information using the tid from user data
     console.log('Fetching tenant data from tenants table...')
     
-    const tenantQueryPromise = supabase
+    const tenantQueryPromise = supabaseService
       .from('tenants')
       .select('*')
       .eq('id', userData.tid)

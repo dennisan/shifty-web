@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { supabase, supabaseService } from '../supabaseClient'
-import { useAuth } from '../AuthContext'
 
 const Dashboard = ({ onNavigateToUserView }) => {
-  const { signOut, userData, tenantData } = useAuth()
   const [subscriptionPlans, setSubscriptionPlans] = useState([])
   const [currentSubscription, setCurrentSubscription] = useState(null)
   const [userLimitInfo, setUserLimitInfo] = useState(null)
@@ -186,13 +184,6 @@ const fetchUserLimitInfo = async (tenantId) => {
     alert(`Subscribing to ${plan.name}`)
   }
 
-  const handleSignOut = async () => {
-    const { error } = await signOut()
-    if (error) {
-      console.error('Error signing out:', error.message)
-    }
-  }
-
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -203,42 +194,6 @@ const fetchUserLimitInfo = async (tenantId) => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        padding: '20px',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '10px',
-        marginBottom: '30px',
-        border: '1px solid #dee2e6'
-      }}>
-        <div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#333', marginBottom: '5px' }}>
-            {tenantData?.name || 'Tenant'}
-          </div>
-          <div style={{ fontSize: '14px', color: '#666' }}>
-            Welcome, {userData?.first_name} {userData?.last_name}
-          </div>
-        </div>
-        
-        <button 
-          onClick={handleSignOut}
-          style={{ 
-            padding: '8px 16px', 
-            backgroundColor: '#dc3545', 
-            color: 'white', 
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          Sign Out
-        </button>
-      </div>
-
       <div style={{ marginBottom: '30px' }}>
         <h1>Choose Your Subscription Plan</h1>
         <p>Select the plan that best fits your needs</p>
@@ -474,23 +429,7 @@ const fetchUserLimitInfo = async (tenantId) => {
         ))}
       </div>
 
-      {/* Navigation Button */}
-      <div style={{ textAlign: 'center', marginTop: '30px' }}>
-        <button 
-          onClick={onNavigateToUserView}
-          style={{ 
-            padding: '10px 20px', 
-            backgroundColor: '#6c757d', 
-            color: 'white', 
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }}
-        >
-          Go to User View
-        </button>
-      </div>
+
     </div>
   )
 }

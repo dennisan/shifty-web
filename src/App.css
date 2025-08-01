@@ -18,10 +18,6 @@ body {
 
 .App {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
 }
 
 /* Loading styles */
@@ -614,5 +610,85 @@ body {
   
   .post-details {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Layout styles */
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+  padding-top: 64px; /* Account for fixed header */
+}
+
+/* Desktop sidebar */
+@media (min-width: 768px) {
+  .main-content {
+    margin-left: 250px;
+  }
+  
+  .sidebar-desktop {
+    display: block !important;
+  }
+  
+  .sidebar-mobile {
+    display: none !important;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 767px) {
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .sidebar-desktop {
+    display: none !important;
+  }
+  
+  .sidebar-mobile {
+    display: block !important;
+  }
+}
+
+/* Ensure proper z-index stacking */
+.layout {
+  position: relative;
+}
+
+.main-content {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-desktop,
+.sidebar-mobile {
+  z-index: 1000;
+}
+
+/* Hide hamburger menu on desktop */
+@media (min-width: 768px) {
+  .hamburger-menu {
+    display: none !important;
+  }
+}
+
+/* Show hamburger menu only on mobile */
+@media (max-width: 767px) {
+  .hamburger-menu {
+    display: flex !important;
+  }
+}
+
+/* Hide mobile overlay on desktop */
+@media (min-width: 768px) {
+  .sidebar-overlay {
+    display: none !important;
   }
 }

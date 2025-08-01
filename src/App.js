@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './AuthContext'
 import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
 import UserView from './components/UserView'
+import Layout from './components/Layout'
 
 const AppContent = () => {
   const { user, userData, tenantData, loading } = useAuth()
@@ -42,7 +43,13 @@ const AppContent = () => {
 
   return (
     <div className="App">
-      {user ? renderAuthenticatedContent() : <Auth />}
+      {user ? (
+        <Layout>
+          {renderAuthenticatedContent()}
+        </Layout>
+      ) : (
+        <Auth />
+      )}
     </div>
   )
 }
