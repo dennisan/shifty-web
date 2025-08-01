@@ -5,9 +5,21 @@ const Header = ({ userData, tenantData, onMenuClick, sidebarOpen }) => {
   const { signOut } = useAuth()
 
   const handleSignOut = async () => {
-    const { error } = await signOut()
-    if (error) {
-      console.error('Error signing out:', error.message)
+    try {
+      console.log('Header: Initiating sign out...')
+      const { error } = await signOut()
+      if (error && error.message !== 'Auth session missing!') {
+        console.error('Error signing out:', error.message)
+        alert('Error signing out. Please try again.')
+      } else {
+        console.log('Header: Sign out successful')
+      }
+    } catch (error) {
+      console.error('Unexpected error in handleSignOut:', error)
+      // Don't show alert for session missing errors as they're handled gracefully
+      if (!error.message?.includes('Auth session missing')) {
+        alert('An unexpected error occurred while signing out.')
+      }
     }
   }
 
@@ -61,22 +73,24 @@ const Header = ({ userData, tenantData, onMenuClick, sidebarOpen }) => {
         </div>
       </div>
 
-      {/* Right side - Sign out button */}
-      <button 
-        onClick={handleSignOut}
-        style={{ 
-          padding: '8px 16px', 
-          backgroundColor: '#dc3545', 
-          color: 'white', 
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontWeight: '500'
-        }}
-      >
-        Sign Out
-      </button>
+      {/* Right side - Sign out button (desktop only) */}
+      {window.innerWidth > 768 && (
+        <button 
+          onClick={handleSignOut}
+          style={{ 
+            padding: '8px 16px', 
+            backgroundColor: '#dc3545', 
+            color: 'white', 
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          Sign Out
+        </button>
+      )}
     </header>
   )
 }

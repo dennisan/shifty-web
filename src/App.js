@@ -57,13 +57,22 @@ const AppContent = () => {
       case 'analytics':
         return <Analytics />
       case 'help':
-        return <Help />
+        return <Help onNavigate={handleNavigation} />
       case 'account-billing':
         return <AccountBilling />
       case 'dashboard':
       default:
         return <Dashboard onNavigateToUserView={handleNavigateToUserView} onNavigate={handleNavigation} />
     }
+  }
+
+  // Handle unauthenticated help access
+  if (!user && currentView === 'help') {
+    return (
+      <div className="App">
+        <Help onNavigate={handleNavigation} />
+      </div>
+    )
   }
 
   return (
@@ -73,7 +82,7 @@ const AppContent = () => {
           {renderAuthenticatedContent()}
         </Layout>
       ) : (
-        <Auth />
+        <Auth onNavigate={handleNavigation} />
       )}
     </div>
   )

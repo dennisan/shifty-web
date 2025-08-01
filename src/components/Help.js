@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { useAuth } from '../AuthContext'
 
-const Help = () => {
+const Help = ({ onNavigate }) => {
   const [markdownContent, setMarkdownContent] = useState('')
   const [loading, setLoading] = useState(true)
   const [toc, setToc] = useState([])
+  const { user } = useAuth()
 
   useEffect(() => {
     fetch('/help.md')
@@ -49,7 +51,7 @@ const Help = () => {
 
   const markdownComponents = {
     img: ({ src, alt }) => (
-      <div style={{ marginTop: '20px', textAlign: 'left' }}>
+      <div style={{ marginTop: '20px', textAlign: 'center' }}>
         <img 
           src={src} 
           alt={alt}
@@ -58,7 +60,7 @@ const Help = () => {
             width: '100%',
             height: 'auto', 
             borderRadius: '8px',
-            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }}
         />
       </div>
@@ -185,15 +187,62 @@ const Help = () => {
       backgroundColor: '#f8f9fa',
       minHeight: 'calc(100vh - 64px)'
     }}>
-      <h1 style={{ 
-        color: '#2c3e50', 
-        fontSize: '32px', 
-        fontWeight: '700', 
-        marginBottom: '30px',
-        textAlign: 'center'
-      }}>
-        Help and Documentation
-      </h1>
+      {/* Header with Back button for unauthenticated users */}
+      {!user && onNavigate && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+          padding: '16px',
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        }}>
+          <h1 style={{ 
+            color: '#2c3e50', 
+            fontSize: '24px', 
+            fontWeight: '700', 
+            margin: 0
+          }}>
+            Help and Documentation
+          </h1>
+          <button
+            onClick={() => onNavigate('dashboard')}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = '#5a67d8'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = '#667eea'
+            }}
+          >
+            ← Back to Home
+          </button>
+        </div>
+      )}
+
+      {user && (
+        <h1 style={{ 
+          color: '#2c3e50', 
+          fontSize: '32px', 
+          fontWeight: '700', 
+          marginBottom: '30px',
+          textAlign: 'center'
+        }}>
+          Help and Documentation
+        </h1>
+      )}
 
       {/* Table of Contents */}
       {toc.length > 0 && (

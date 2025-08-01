@@ -1,6 +1,8 @@
 import React from 'react'
+import { useAuth } from '../AuthContext'
 
 const Sidebar = ({ isOpen, onClose, userData, tenantData, onNavigate, currentView }) => {
+  const { signOut } = useAuth()
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/dashboard' },
     { id: 'account-billing', label: 'Subscription', icon: '💳', path: '/account-billing' },
@@ -12,10 +14,35 @@ const Sidebar = ({ isOpen, onClose, userData, tenantData, onNavigate, currentVie
     { id: 'help', label: 'Help', icon: '❓', path: '/help' },
   ]
 
+  const mobileMenuItems = [
+    ...menuItems,
+    { id: 'signout', label: 'Sign Out', icon: '🚪', path: '/signout', isSignOut: true }
+  ]
+
   const handleItemClick = (item) => {
     console.log('Navigate to:', item.id)
     onNavigate(item.id)
     onClose() // Close sidebar on mobile
+  }
+
+  const handleSignOut = async () => {
+    try {
+      console.log('Sidebar: Initiating sign out...')
+      const { error } = await signOut()
+      if (error && error.message !== 'Auth session missing!') {
+        console.error('Error signing out:', error.message)
+        alert('Error signing out. Please try again.')
+      } else {
+        console.log('Sidebar: Sign out successful')
+      }
+      onClose() // Close sidebar
+    } catch (error) {
+      console.error('Unexpected error in handleSignOut:', error)
+      if (!error.message?.includes('Auth session missing')) {
+        alert('An unexpected error occurred while signing out.')
+      }
+      onClose() // Close sidebar
+    }
   }
 
   return (
@@ -97,16 +124,16 @@ const Sidebar = ({ isOpen, onClose, userData, tenantData, onNavigate, currentVie
       >
         <nav style={{ padding: '20px 0' }}>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {menuItems.map((item) => (
+            {mobileMenuItems.map((item) => (
               <li key={item.id}>
                 <button
-                  onClick={() => handleItemClick(item)}
+                  onClick={() => item.isSignOut ? handleSignOut() : handleItemClick(item)}
                   style={{
                     width: '100%',
                     padding: '15px 20px',
-                    backgroundColor: currentView === item.id ? '#667eea' : 'transparent',
-                    border: currentView === item.id ? 'none' : 'none',
-                    color: currentView === item.id ? 'white' : 'white',
+                    backgroundColor: item.isSignOut ? '#dc3545' : (currentView === item.id ? '#667eea' : 'transparent'),
+                    border: 'none',
+                    color: 'white',
                     textAlign: 'left',
                     cursor: 'pointer',
                     fontSize: '16px',
@@ -114,17 +141,21 @@ const Sidebar = ({ isOpen, onClose, userData, tenantData, onNavigate, currentVie
                     alignItems: 'center',
                     gap: '15px',
                     transition: 'background-color 0.2s',
-                    fontWeight: currentView === item.id ? '600' : '400',
-                    borderLeft: currentView === item.id ? '4px solid white' : '4px solid transparent'
+                    fontWeight: item.isSignOut ? '600' : (currentView === item.id ? '600' : '400'),
+                    borderLeft: item.isSignOut ? '4px solid #ff6b6b' : (currentView === item.id ? '4px solid white' : '4px solid transparent')
                   }}
                   onMouseEnter={(e) => {
-                    if (currentView !== item.id) {
+                    if (!item.isSignOut && currentView !== item.id) {
                       e.target.style.backgroundColor = '#34495e'
+                    } else if (item.isSignOut) {
+                      e.target.style.backgroundColor = '#c82333'
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (currentView !== item.id) {
+                    if (!item.isSignOut && currentView !== item.id) {
                       e.target.style.backgroundColor = 'transparent'
+                    } else if (item.isSignOut) {
+                      e.target.style.backgroundColor = '#dc3545'
                     }
                   }}
                 >

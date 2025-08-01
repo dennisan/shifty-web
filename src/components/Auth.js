@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth } from '../AuthContext'
 
-const Auth = () => {
+const Auth = ({ onNavigate }) => {
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -86,30 +86,61 @@ const Auth = () => {
         padding: '4rem 2rem',
         color: 'white'
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '1rem',
-          marginBottom: '1rem'
-        }}>
-          <h2 style={{
-            fontSize: '3rem',
-            fontWeight: 'bold',
-            textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
-            margin: 0
+        {window.innerWidth <= 768 ? (
+          // Mobile layout: logo above welcome message
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '1rem'
           }}>
-            Welcome to QwikShift
-          </h2>
-          <img 
-            src="/QwikShiftLogo.png" 
-            alt="QwikShift Logo" 
-            style={{
-              height: '60px',
-              width: 'auto'
-            }}
-          />
-        </div>
+            <img 
+              src="/QwikShiftLogo.png" 
+              alt="QwikShift Logo" 
+              style={{
+                height: '80px',
+                width: 'auto'
+              }}
+            />
+            <h2 style={{
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+              margin: 0,
+              textAlign: 'center'
+            }}>
+              Welcome to QwikShift
+            </h2>
+          </div>
+        ) : (
+          // Desktop layout: logo and welcome message side by side
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '1rem'
+          }}>
+            <h2 style={{
+              fontSize: '3rem',
+              fontWeight: 'bold',
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.3)',
+              margin: 0
+            }}>
+              Welcome to QwikShift
+            </h2>
+            <img 
+              src="/QwikShiftLogo.png" 
+              alt="QwikShift Logo" 
+              style={{
+                height: '60px',
+                width: 'auto'
+              }}
+            />
+          </div>
+        )}
         <p style={{
           fontSize: '1.2rem',
           marginBottom: '2rem',
@@ -117,21 +148,50 @@ const Auth = () => {
         }}>
           Streamline your workforce management with powerful scheduling, employee tracking, and analytics
         </p>
-        <button 
-          onClick={() => document.getElementById('features-section').scrollIntoView({ behavior: 'smooth' })}
-          style={{
-            padding: '1rem 2rem',
-            backgroundColor: 'white',
-            color: '#667eea',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '1.1rem',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
-          Learn More
-        </button>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem'
+        }}>
+          <button 
+            onClick={() => document.getElementById('features-section').scrollIntoView({ behavior: 'smooth' })}
+            style={{
+              padding: '1rem 2rem',
+              backgroundColor: 'white',
+              color: '#667eea',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            Learn More
+          </button>
+          <button 
+            onClick={() => onNavigate('help')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'
+            }}
+          >
+            QwikShift Help
+          </button>
+        </div>
       </section>
 
       {/* Features Section */}
@@ -275,12 +335,25 @@ const Auth = () => {
             <h4 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Email Support</h4>
             <p>Get help at signalpeaksw@outlook.com</p>
           </div>
-          <div style={{
-            padding: '2rem',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '12px',
-            textAlign: 'center'
-          }}>
+          <div 
+            onClick={() => onNavigate('help')}
+            style={{
+              padding: '2rem',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '12px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'translateY(-2px)'
+              e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'translateY(0)'
+              e.target.style.boxShadow = 'none'
+            }}
+          >
             <h4 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Documentation</h4>
             <p>Comprehensive guides and tutorials</p>
           </div>

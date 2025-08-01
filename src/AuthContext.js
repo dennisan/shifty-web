@@ -108,13 +108,40 @@ export const AuthProvider = ({ children }) => {
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (!error) {
+    try {
+      console.log('Signing out...')
+      
+      // Clear all local storage and session storage
+      localStorage.clear()
+      sessionStorage.clear()
+      
+      // Clear Supabase session
+      const { error } = await supabase.auth.signOut()
+      
+      // Clear state regardless of error
       setUser(null)
       setUserData(null)
       setTenantData(null)
+      
+      if (!error) {
+        console.log('Sign out successful')
+      } else {
+        console.error('Error during sign out:', error)
+      }
+      
+      // Redirect to login page instead of reloading
+      window.location.href = '/'
+      return { error }
+    } catch (error) {
+      console.error('Unexpected error during sign out:', error)
+      // Clear state even if there's an error
+      setUser(null)
+      setUserData(null)
+      setTenantData(null)
+      // Redirect to login page
+      window.location.href = '/'
+      return { error }
     }
-    return { error }
   }
 
   const resetPassword = async (email) => {
@@ -131,9 +158,9 @@ export const AuthProvider = ({ children }) => {
       setUser(null)
       setUserData(null)
       setTenantData(null)
-      // Clear any stored auth data
-      localStorage.removeItem('supabase.auth.token')
-      sessionStorage.removeItem('supabase.auth.token')
+      // Clear all stored auth data
+      localStorage.clear()
+      sessionStorage.clear()
     } catch (error) {
       console.error('Error clearing session:', error)
     }
